@@ -1,0 +1,82 @@
+<!DOCTYPE html>  <html> <head>   <title>main.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               main.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <h2>Hello Bear</h2>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h2>Source</h2>
+
+<p><code>enchant();</code>
+enchant.js を使う前に必要な処理。
+(enchant.js 本体や、読み込んだプラグインの中で定義されている enchant.Foo, enchant.Plugin.Bar などのクラスを、
+ それぞれグローバルの Foo, Bar にエクスポートする。)</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">enchant</span><span class="p">();</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p><code>window.onload</code>
+ページがロードされた際に実行される関数。
+すべての処理はページがロードされてから行うため、 window.onload の中で実行する。
+特に new Core(); は、<body> タグが存在しないとエラーになるので注意。</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nb">window</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p><code>new Core(width, height)</code>
+Core オブジェクトを作成する。
+画面の大きさは 320ピクセル x 320ピクセル に設定する。</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">game</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Core</span><span class="p">(</span><span class="mi">320</span><span class="p">,</span> <span class="mi">320</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p><code>Core.fps</code>
+ゲームの fps (frame per second) を指定する。この場合、1秒間あたり15回画面が更新される。</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">game</span><span class="p">.</span><span class="nx">fps</span> <span class="o">=</span> <span class="mi">15</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p><code>Core#preload</code>
+必要なファイルを相対パスで引数に指定する。 ファイルはすべて、ゲームが始まる前にロードされる。</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">game</span><span class="p">.</span><span class="nx">preload</span><span class="p">(</span><span class="s2">&quot;chara1.png&quot;</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p><code>Core#onload</code></p>
+
+<p>ロードが完了した直後に実行される関数を指定している。
+onload プロパティは load イベントのリスナとして働くので、以下の2つの書き方は同じ意味。</p>
+
+<p>game.onload = function(){
+    // code
+}</p>
+
+<p>game.addEventListener("load", function(){
+    // code
+})</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">game</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p><code>new Sprite(width, height);</code>
+スプライトオブジェクトを作成する。
+Sprite は、Entity, Node, EventTarget を継承しており、それぞれのメソッドやプロパティを使うことができる。</p>             </td>             <td class="code">               <div class="highlight"><pre>    
+        <span class="nx">bear</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Sprite</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p><code>Sprite.image {Object}</code>
+Core#preload で指定されたファイルは、Core.assets のプロパティとして格納される。
+Sprite.image にこれを代入することで、画像を表示することができる</p>             </td>             <td class="code">               <div class="highlight"><pre>    
+        <span class="nx">bear</span><span class="p">.</span><span class="nx">image</span> <span class="o">=</span> <span class="nx">game</span><span class="p">.</span><span class="nx">assets</span><span class="p">[</span><span class="s2">&quot;chara1.png&quot;</span><span class="p">];</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p><code>Node.x Node.y {Number}</code>
+x, y 座標を指定する。
+viewport の大きさに合わせて画面が拡大縮小されている場合も、
+オリジナルの座標系で指定できる。</p>             </td>             <td class="code">               <div class="highlight"><pre>    
+        <span class="nx">bear</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">bear</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p><code>Sprite.frame {Number}</code>
+<code>(width, height)</code> ピクセルの格子で指定された画像を区切り、
+左上から数えて <code>frame</code> 番目の画像を表示することができる。
+デフォルトでは、0:左上の画像が表示される。
+このサンプルでは、シロクマが立っている画像を表示する (chara1.gif 参照)。</p>             </td>             <td class="code">               <div class="highlight"><pre>    
+        <span class="nx">bear</span><span class="p">.</span><span class="nx">frame</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p><code>Group#addChild(node) {Function}</code>
+オブジェクトをノードツリーに追加するメソッド。
+ここでは、クマの画像を表示するスプライトオブジェクトを、rootScene に追加している。
+Core.rootScene は Group を継承した Scene クラスのインスタンスで、描画ツリーのルートになる特別な Scene オブジェクト。
+この rootScene に描画したいオブジェクトを子として追加する (addChild) ことで、毎フレーム描画されるようになる。
+引数には enchant.Node を継承したクラス (Entity, Group, Scene, Label, Sprite..) を指定する。</p>             </td>             <td class="code">               <div class="highlight"><pre>    
+        <span class="nx">game</span><span class="p">.</span><span class="nx">rootScene</span><span class="p">.</span><span class="nx">addChild</span><span class="p">(</span><span class="nx">bear</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p><code>EventTarget#addEventListener(event, listener)</code>
+イベントに対するリスナを登録する。
+リスナとして登録された関数は、指定されたイベントの発行時に実行される。
+よく使うイベントには、以下のようなものがある。</p>
+
+<ul>
+<li>"touchstart" : タッチ/クリックされたとき</li>
+<li>"touchmove" : タッチ座標が動いた/ドラッグされたとき</li>
+<li>"touchend" : タッチ/クリックが離されたとき</li>
+<li>"enterframe" : 新しいフレームが描画される前</li>
+<li>"exitframe" : 新しいフレームが描画された後</li>
+</ul>
+
+<p>enchant.js やプラグインに組み込まれたイベントは、それぞれのタイミングで自動で発行されるが、
+EventTarget#dispatchEvent で任意のイベントを発行することもできる。</p>
+
+<p>ここでは、右に向かって走っていくアニメーションを表現するために、
+新しいフレームが描画される前に、毎回クマの画像を切り替え、x座標を1増やすという処理をリスナとして追加する。</p>             </td>             <td class="code">               <div class="highlight"><pre>    
+        <span class="nx">bear</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;enterframe&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>クマを走らせるために、x座標をインクリメントしている。
+この無名関数 function(){ ... } は enterframe イベントのリスナなので、毎フレーム実行される。</p>             </td>             <td class="code">               <div class="highlight"><pre>        
+            <span class="k">this</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>this.age (Node.age) は、クマのオブジェクトが今までに何回描画されたか
+クマの画像を変えて走るアニメーションを表現するために、
+frame を 6 -> 7 -> 6 -> 7.. と順番に変えている。</p>             </td>             <td class="code">               <div class="highlight"><pre>        
+            <span class="k">this</span><span class="p">.</span><span class="nx">frame</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">age</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">6</span><span class="p">;</span>
+        <span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>タッチされると消える処理を実現するために、
+<code>touchstart</code> イベントが起こったとき、クマが消える処理をリスナとして追加する。</p>             </td>             <td class="code">               <div class="highlight"><pre>    
+        <span class="nx">bear</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;touchstart&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>クマを game.rootScene から削除する。
+Group#addChild の逆は Group#removeChild。</p>             </td>             <td class="code">               <div class="highlight"><pre>        
+            <span class="nx">game</span><span class="p">.</span><span class="nx">rootScene</span><span class="p">.</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">bear</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p><code>Core#start</code>
+ゲームを開始する。この関数を実行するまで、ゲームは待機状態となる。
+代わりに <code>Core#debug</code> を使うことで、デバッグモードで起動することができる。
+<code>Core#pause();</code> で一時停止し、 <code>Core#resume();</code> で再開することができる。</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">game</span><span class="p">.</span><span class="nx">start</span><span class="p">();</span>
+<span class="p">};</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
