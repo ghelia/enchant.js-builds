@@ -485,6 +485,7 @@ enchant.Event = enchant.Class.create({
  *      ... // Describes initial core processing
  *   };
  *   core.start();
+ *
  * @type {String}
  */
 enchant.Event.LOAD = 'load';
@@ -2568,8 +2569,9 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
                 elem = image._element;
                 sx = this._frameLeft;
                 sy = Math.min(this._frameTop, ih - h);
-                sw = Math.min(iw - sx, w);
-                sh = Math.min(ih - sy, h);
+                // IE9 doesn't allow for negative or 0 widths/heights when drawing on the CANVAS element
+                sw = Math.max(0.01, Math.min(iw - sx, w));
+                sh = Math.max(0.01, Math.min(ih - sy, h));
                 ctx.drawImage(elem, sx, sy, sw, sh, 0, 0, w, h);
             }
         }
@@ -3173,6 +3175,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
      *          this.x = 64 - player.x;
      *      }
      *   });
+     *
      * @constructs
      * @extends enchant.Node
      */

@@ -1654,6 +1654,7 @@ if (typeof glMatrixArrayType === 'undefined') {
          *   var sp = new Sprite3D();
          *   sp.set(core.assets['sample.dae']);
          *   //Becomes Sprite3D with sample.dae model information
+         *
          */
         set: function(sprite) {
             for (var prop in sprite) {

@@ -1,5 +1,5 @@
 /**
- * enchant.js v0.7.1
+ * enchant.js v0.8.0
  * http://enchantjs.com
  *
  * Copyright Ubiquitous Entertainment Inc.
@@ -663,6 +663,11 @@ enchant.Event.INPUT_CHANGE = 'inputchange';
 enchant.Event.INPUT_END = 'inputend';
 
 /**
+ * @type {String}
+ */
+enchant.Event.INPUT_STATE_CHANGED = 'inputstatechanged';
+
+/**
  * Ereignis, welchses auftritt wenn der "Nach Links"-Knopf gedrückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
  * @type {String}
@@ -934,8 +939,8 @@ enchant.EventTarget = enchant.Class.create({
                     window.innerWidth / width,
                     window.innerHeight / height
                 );
-                this._pageX = 0;
-                this._pageY = 0;
+                this._pageX = stage.getBoundingClientRect().left;
+                this._pageY = stage.getBoundingClientRect().top;
             } else {
                 var style = window.getComputedStyle(stage);
                 sWidth = parseInt(style.width, 10);
@@ -1040,16 +1045,17 @@ enchant.EventTarget = enchant.Class.create({
              * @type {Object.<String, Boolean>}
              */
             this.input = {};
+
+            this.keyboardInputManager = new enchant.KeyboardInputManager(window.document, this.input);
+            this.keyboardInputManager.addBroadcastTarget(this);
+            this._keybind = this.keyboardInputManager._binds;
+
             if (!enchant.ENV.KEY_BIND_TABLE) {
                 enchant.ENV.KEY_BIND_TABLE = {};
             }
-            this._keybind = enchant.ENV.KEY_BIND_TABLE;
-            this.pressedKeysNum = 0;
-            this._internalButtondownListeners = {};
-            this._internalButtonupListeners = {};
 
-            for (var prop in this._keybind) {
-                this.keybind(prop, this._keybind[prop]);
+            for (var prop in enchant.ENV.KEY_BIND_TABLE) {
+                this.keybind(prop, enchant.ENV.KEY_BIND_TABLE[prop]);
             }
 
             if (initial) {
@@ -1060,25 +1066,6 @@ enchant.EventTarget = enchant.Class.create({
                     if (enchant.ENV.PREVENT_DEFAULT_KEY_CODES.indexOf(e.keyCode) !== -1) {
                         e.preventDefault();
                         e.stopPropagation();
-                    }
-
-                    if (!core.running) {
-                        return;
-                    }
-                    var button = core._keybind[e.keyCode];
-                    if (button) {
-                        evt = new enchant.Event(button + 'buttondown');
-                        core.dispatchEvent(evt);
-                    }
-                }, true);
-                document.addEventListener('keyup', function(e) {
-                    if (!core.running) {
-                        return;
-                    }
-                    var button = core._keybind[e.keyCode];
-                    if (button) {
-                        evt = new enchant.Event(button + 'buttonup');
-                        core.dispatchEvent(evt);
                     }
                 }, true);
 
@@ -1649,6 +1636,9 @@ enchant.EventTarget = enchant.Class.create({
                 }
             }
         },
+        _buttonListener: function(e) {
+            this.currentScene.dispatchEvent(e);
+        },
         /**
          * Bindet eine Taste.
          *
@@ -1657,33 +1647,9 @@ enchant.EventTarget = enchant.Class.create({
          * @return {enchant.Core} this
          */
         keybind: function(key, button) {
-            this._keybind[key] = button;
-            var onxbuttondown = function(e) {
-                var inputEvent;
-                if (!this.input[button]) {
-                    this.input[button] = true;
-                    inputEvent = new enchant.Event((this.pressedKeysNum++) ? 'inputchange' : 'inputstart');
-                    this.dispatchEvent(inputEvent);
-                    this.currentScene.dispatchEvent(inputEvent);
-                }
-                this.currentScene.dispatchEvent(e);
-            };
-            var onxbuttonup = function(e) {
-                var inputEvent;
-                if (this.input[button]) {
-                    this.input[button] = false;
-                    inputEvent = new enchant.Event((--this.pressedKeysNum) ? 'inputchange' : 'inputend');
-                    this.dispatchEvent(inputEvent);
-                    this.currentScene.dispatchEvent(inputEvent);
-                }
-                this.currentScene.dispatchEvent(e);
-            };
-
-            this.addEventListener(button + 'buttondown', onxbuttondown);
-            this.addEventListener(button + 'buttonup', onxbuttonup);
-
-            this._internalButtondownListeners[key] = onxbuttondown;
-            this._internalButtonupListeners[key] = onxbuttonup;
+            this.keyboardInputManager.keybind(key, button);
+            this.addEventListener(button + 'buttondown', this._buttonListener);
+            this.addEventListener(button + 'buttonup', this._buttonListener);
             return this;
         },
         /**
@@ -1693,21 +1659,14 @@ enchant.EventTarget = enchant.Class.create({
          * @return {enchant.Core} this
          */
         keyunbind: function(key) {
-            if (!this._keybind[key]) {
-                return this;
-            }
-            var buttondowns = this._internalButtondownListeners;
-            var buttonups = this._internalButtonupListeners;
-
-            this.removeEventListener(key + 'buttondown', buttondowns);
-            this.removeEventListener(key + 'buttonup', buttonups);
-
-            delete buttondowns[key];
-            delete buttonups[key];
-
-            delete this._keybind[key];
-
+            var button = this._keybind[key];
+            this.keyboardInputManager.keyunbind(key);
+            this.removeEventListener(button + 'buttondown', this._buttonListener);
+            this.removeEventListener(button + 'buttonup', this._buttonListener);
             return this;
+        },
+        changeButtonState: function(button, bool) {
+            this.keyboardInputManager.changeState(button, bool);
         },
         /**
          * Liefert die vergange Spielzeit (keine reale) die seit dem Aufruf von core.start
@@ -1771,6 +1730,265 @@ enchant.EventTarget = enchant.Class.create({
  * @type {*}
  */
 enchant.Game = enchant.Core;
+/**
+ * @scope enchant.InputManager.prototype
+ */
+enchant.InputManager = enchant.Class.create(enchant.EventTarget, {
+    /**
+     * @name enchant.InputManager
+     * @class
+     * @constructs
+     * @extends enchant.EventTarget
+     */
+    initialize: function(valueStore, source) {
+        enchant.EventTarget.call(this);
+
+        /**
+         * @type {enchant.EventTarget[]}
+         */
+        this.broadcastTarget = [];
+        /**
+         * @type {Object}
+         */
+        this.valueStore = valueStore;
+        /**
+         * @type {Object}
+         */
+        this.source = source || this;
+
+        this._binds = {};
+
+        this._stateHandler = function(e) {
+            var id = e.source.identifier;
+            var name = this._binds[id];
+            this.changeState(name, e.data);
+        }.bind(this);
+    },
+    /**
+     */
+    bind: function(inputSource, name) {
+        inputSource.addEventListener(enchant.Event.INPUT_STATE_CHANGED, this._stateHandler);
+        this._binds[inputSource.identifier] = name;
+    },
+    /**
+     */
+    unbind: function(inputSource) {
+        inputSource.removeEventListener(enchant.Event.INPUT_STATE_CHANGED, this._stateHandler);
+        delete this._binds[inputSource.identifier];
+    },
+    /**
+     */
+    addBroadcastTarget: function(eventTarget) {
+        var i = this.broadcastTarget.indexOf(eventTarget);
+        if (i === -1) {
+            this.broadcastTarget.push(eventTarget);
+        }
+    },
+    /**
+     */
+    removeBroadcastTarget: function(eventTarget) {
+        var i = this.broadcastTarget.indexOf(eventTarget);
+        if (i !== -1) {
+            this.broadcastTarget.splice(i, 1);
+        }
+    },
+    /**
+     */
+    broadcastEvent: function(e) {
+        var target = this.broadcastTarget;
+        for (var i = 0, l = target.length; i < l; i++) {
+            target[i].dispatchEvent(e);
+        }
+    },
+    /**
+     */
+    changeState: function(name, data) {
+    }
+});
+
+/**
+ * @scope enchant.InputSource.prototype
+ */
+enchant.InputSource = enchant.Class.create(enchant.EventTarget, {
+    /**
+     * @name enchant.InputSource
+     * @class
+     * @constructs
+     * @extends enchant.EventTarget
+     */
+    initialize: function(identifier) {
+        enchant.EventTarget.call(this);
+        this.identifier = identifier;
+    },
+    /**
+     */
+    notifyStateChange: function(data) {
+        var e = new enchant.Event(enchant.Event.INPUT_STATE_CHANGED);
+        e.data = data;
+        e.source = this;
+        this.dispatchEvent(e);
+    }
+});
+
+/**
+ * @scope enchant.BinaryInputManager.prototype
+ */
+enchant.BinaryInputManager = enchant.Class.create(enchant.InputManager, {
+    /**
+     * @name enchant.BinaryInputManager
+     * @class
+     * @constructs
+     * @extends enchant.InputManager
+     */
+    initialize: function(flagStore, activeEventNameSuffix, inactiveEventNameSuffix, source) {
+        enchant.InputManager.call(this, flagStore, source);
+        /**
+         * @type {Number}
+         */
+        this.activeInputsNum = 0;
+        /**
+         * @type {String}
+         */
+        this.activeEventNameSuffix = activeEventNameSuffix;
+        /**
+         * @type {String}
+         */
+        this.inactiveEventNameSuffix = inactiveEventNameSuffix;
+    },
+    /**
+     * @see enchant.InputManager#bind
+     */
+    bind: function(binaryInputSource, name) {
+        enchant.InputManager.prototype.bind.call(this, binaryInputSource, name);
+        this.valueStore[name] = false;
+    },
+    /**
+     * @see enchant.InputManager#unbind
+     */
+    unbind: function(binaryInputSource) {
+        enchant.InputManager.prototype.unbind.call(this, binaryInputSource);
+        var name = this._binds[binaryInputSource.identifier];
+        delete this.valueStore[name];
+    },
+    /**
+     */
+    changeState: function(name, bool) {
+        if (bool) {
+            this._down(name);
+        } else {
+            this._up(name);
+        }
+    },
+    _down: function(name) {
+        var inputEvent;
+        if (!this.valueStore[name]) {
+            this.valueStore[name] = true;
+            inputEvent = new enchant.Event((this.activeInputsNum++) ? 'inputchange' : 'inputstart');
+            inputEvent.source = this.source;
+            this.broadcastEvent(inputEvent);
+        }
+        var downEvent = new enchant.Event(name + this.activeEventNameSuffix);
+        downEvent.source = this.source;
+        this.broadcastEvent(downEvent);
+    },
+    _up: function(name) {
+        var inputEvent;
+        if (this.valueStore[name]) {
+            this.valueStore[name] = false;
+            inputEvent = new enchant.Event((--this.activeInputsNum) ? 'inputchange' : 'inputend');
+            inputEvent.source = this.source;
+            this.broadcastEvent(inputEvent);
+        }
+        var upEvent = new enchant.Event(name + this.inactiveEventNameSuffix);
+        upEvent.source = this.source;
+        this.broadcastEvent(upEvent);
+    }
+});
+
+/**
+ * @scope enchant.BinaryInputSource.prototype
+ */
+enchant.BinaryInputSource = enchant.Class.create(enchant.InputSource, {
+    /**
+     * @name enchant.BinaryInputSource
+     * @class
+     * @constructs
+     * @extends enchant.InputSource
+     */
+    initialize: function(identifier) {
+        enchant.InputSource.call(this, identifier);
+    }
+});
+
+/**
+ * @scope enchant.KeyboardInputManager.prototype
+ */
+enchant.KeyboardInputManager = enchant.Class.create(enchant.BinaryInputManager, {
+    /**
+     * @name enchant.KeyboardInputManager
+     * @class
+     * @constructs
+     * @extends enchant.BinaryInputManager
+     */
+    initialize: function(domElement, flagStore) {
+        enchant.BinaryInputManager.call(this, flagStore, 'buttondown', 'buttonup');
+        this._attachDOMEvent(domElement, 'keydown', true);
+        this._attachDOMEvent(domElement, 'keyup', false);
+    },
+    /**
+     */
+    keybind: function(keyCode, name) {
+        this.bind(enchant.KeyboardInputSource.getByKeyCode('' + keyCode), name);
+    },
+    /**
+     */
+    keyunbind: function(keyCode) {
+        this.unbind(enchant.KeyboardInputSource.getByKeyCode('' + keyCode));
+    },
+    _attachDOMEvent: function(domElement, eventType, state) {
+        domElement.addEventListener(eventType,  function(e) {
+            var core = enchant.Core.instance;
+            if (!core || !core.running) {
+                return;
+            }
+            var code = e.keyCode;
+            var source = enchant.KeyboardInputSource._instances[code];
+            if (source) {
+                source.notifyStateChange(state);
+            }
+        }, true);
+    }
+});
+
+/**
+ * @scope enchant.KeyboardInputSource.prototype
+ */
+enchant.KeyboardInputSource = enchant.Class.create(enchant.BinaryInputSource, {
+    /**
+     * @name enchant.KeyboardInputSource
+     * @class
+     * @constructs
+     * @extends enchant.BinaryInputSource
+     */
+    initialize: function(keyCode) {
+        enchant.BinaryInputSource.call(this, keyCode);
+    }
+});
+/**
+ * @private
+ */
+enchant.KeyboardInputSource._instances = {};
+/**
+ * @static
+ * @return {enchant.KeyboardInputSource} instance.
+ */
+enchant.KeyboardInputSource.getByKeyCode = function(keyCode) {
+    if (!this._instances[keyCode]) {
+        this._instances[keyCode] = new enchant.KeyboardInputSource(keyCode);
+    }
+    return this._instances[keyCode];
+};
+
 /**
  * @scope enchant.Node.prototype
  */
@@ -2055,18 +2273,16 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
                 return;
             }
             this.buttonPressed = true;
-            var e = new enchant.Event(this.buttonMode + 'buttondown');
-            this.dispatchEvent(e);
-            core.dispatchEvent(e);
+            this.dispatchEvent(new enchant.Event(this.buttonMode + 'buttondown'));
+            core.changeButtonState(this.buttonMode, true);
         });
         this.addEventListener('touchend', function() {
             if (!this.buttonMode) {
                 return;
             }
             this.buttonPressed = false;
-            var e = new enchant.Event(this.buttonMode + 'buttonup');
-            this.dispatchEvent(e);
-            core.dispatchEvent(e);
+            this.dispatchEvent(new enchant.Event(this.buttonMode + 'buttonup'));
+            core.changeButtonState(this.buttonMode, false);
         });
 
         this.enableCollection();
@@ -2617,8 +2833,9 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
                 elem = image._element;
                 sx = this._frameLeft;
                 sy = Math.min(this._frameTop, ih - h);
-                sw = Math.min(iw - sx, w);
-                sh = Math.min(ih - sy, h);
+                // IE9 doesn't allow for negative or 0 widths/heights when drawing on the CANVAS element
+                sw = Math.max(0.01, Math.min(iw - sx, w));
+                sh = Math.max(0.01, Math.min(ih - sy, h));
                 ctx.drawImage(elem, sx, sy, sw, sh, 0, 0, w, h);
             }
         }
@@ -5172,9 +5389,9 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         if(!window.webkitAudioContext){
             throw new Error("This browser does not support WebAudio API.");
         }
-        var actx = enchant.WebAudioSound.audioContext;
         enchant.EventTarget.call(this);
-        this.src = actx.createBufferSource();
+        this.context = enchant.WebAudioSound.audioContext;
+        this.src = this.context.createBufferSource();
         this.buffer = null;
         this._volume = 1;
         this._currentTime = 0;
@@ -5182,24 +5399,29 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         this.connectTarget = enchant.WebAudioSound.destination;
     },
     play: function(dup) {
-        var actx = enchant.WebAudioSound.audioContext;
-        if (this._state === 2) {
-            this.src.connect(this.connectTarget);
-        } else {
-            if (this._state === 1 && !dup) {
-                this.src.disconnect(this.connectTarget);
-            }
-            this.src = actx.createBufferSource();
-            this.src.buffer = this.buffer;
-            this.src.gain.value = this._volume;
-            this.src.connect(this.connectTarget);
-            this.src.noteOn(0);
+        if (this._state === 1 && !dup) {
+            this.src.disconnect(this.connectTarget);
         }
+        if (this._state !== 2) {
+            this._currentTime = 0;
+        }
+        var offset = this._currentTime;
+        var actx = this.context;
+        this.src = actx.createBufferSource();
+        this.src.buffer = this.buffer;
+        this.src.gain.value = this._volume;
+        this.src.connect(this.connectTarget);
+        this.src.noteGrainOn(0, offset, this.buffer.duration - offset - 1.192e-7);
+        this._startTime = actx.currentTime - this._currentTime;
         this._state = 1;
     },
     pause: function() {
-        var actx = enchant.WebAudioSound.audioContext;
-        this.src.disconnect(this.connectTarget);
+        var currentTime = this.currentTime;
+        if (currentTime === this.duration) {
+            return;
+        }
+        this.src.noteOff(0);
+        this._currentTime = currentTime;
         this._state = 2;
     },
     stop: function() {
@@ -5211,10 +5433,10 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         sound.buffer = this.buffer;
         return sound;
     },
-    dulation: {
+    duration: {
         get: function() {
             if (this.buffer) {
-                return this.buffer.dulation;
+                return this.buffer.duration;
             } else {
                 return 0;
             }
@@ -5234,12 +5456,13 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
     },
     currentTime: {
         get: function() {
-            window.console.log('currentTime is not allowed');
-            return this._currentTime;
+            return Math.max(0, Math.min(this.duration, this.src.context.currentTime - this._startTime));
         },
         set: function(time) {
-            window.console.log('currentTime is not allowed');
             this._currentTime = time;
+            if (this._state !== 2) {
+                this.play(false);
+            }
         }
     }
 });
@@ -5250,32 +5473,28 @@ enchant.WebAudioSound.load = function(src, type, callback, onerror) {
     onerror = onerror || function() {};
     sound.addEventListener(enchant.Event.LOAD, callback);
     sound.addEventListener(enchant.Event.ERROR, onerror);
-    var e = new enchant.Event(enchant.Event.ERROR);
-    e.message = 'Cannot load an asset: ' + src;
+    function dispatchErrorEvent() {
+        var e = new enchant.Event(enchant.Event.ERROR);
+        e.message = 'Cannot load an asset: ' + src;
+        enchant.Core.instance.dispatchEvent(e);
+        sound.dispatchEvent(e);
+    }
     var actx, xhr;
     if (canPlay === 'maybe' || canPlay === 'probably') {
         actx = enchant.WebAudioSound.audioContext;
         xhr = new XMLHttpRequest();
-        xhr.responseType = 'arraybuffer';
         xhr.open('GET', src, true);
+        xhr.responseType = 'arraybuffer';
         xhr.onload = function() {
-            actx.decodeAudioData(
-                xhr.response,
-                function(buffer) {
-                    sound.buffer = buffer;
-                    sound.dispatchEvent(new enchant.Event(enchant.Event.LOAD));
-                },
-                function(error) {
-                    enchant.Core.instance.dispatchEvent(e);
-                    sound.dispatchEvent(e);
-                }
-            );
+            actx.decodeAudioData(xhr.response, function(buffer) {
+                sound.buffer = buffer;
+                sound.dispatchEvent(new enchant.Event(enchant.Event.LOAD));
+            }, dispatchErrorEvent);
         };
+        xhr.onerror = dispatchErrorEvent;
         xhr.send(null);
     } else {
-        setTimeout(function() {
-            sound.dispatchEvent(e);
-        }, 50);
+        setTimeout(dispatchErrorEvent,  50);
     }
     return sound;
 };
