@@ -9,9 +9,10 @@ Pre-built files of [wise9/enchant.js](https://github.com/wise9/enchant.js).
 
 Download
 --------
+> v0.8.0
 
-- [enchant.js](https://raw.github.com/uei/enchant.js-builds/master/src/enchant.js)
-- [enchant.min.js](https://raw.github.com/uei/enchant.js-builds/master/src/enchant.min.js) (compressed)
+- [enchant.js](https://raw.github.com/uei/enchant.js-builds/master/build/enchant.js)
+- [enchant.min.js](https://raw.github.com/uei/enchant.js-builds/master/build/enchant.min.js) (compressed)
 
 - [Download Zip](https://github.com/wise9/enchant.js/archive/master.zip)
 
@@ -43,7 +44,7 @@ Platform
 - Chrome
 - Safari
 - Firefox
-- IE9 
+- IE9
 - iOS
 - Android 2.1+
 
@@ -59,7 +60,7 @@ Usage
 <script>
     enchant();
     window.onload = function(){
-        var game = new Game(320, 320); 
+        var game = new Game(320, 320);
 
         var label = new Label('Hello, enchant.js!');
         game.rootScene.addChild(label);
