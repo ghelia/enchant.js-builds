@@ -42,11 +42,21 @@
 				
 					<li><a href="../symbols/enchant.ActionEventTarget.html">enchant<span class='break'> </span>.<span class='break'> </span>ActionEventTarget</a></li>
 				
+					<li><a href="../symbols/enchant.BinaryInputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>BinaryInputManager</a></li>
+				
+					<li><a href="../symbols/enchant.BinaryInputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>BinaryInputSource</a></li>
+				
 					<li><a href="../symbols/enchant.CanvasLayer.html">enchant<span class='break'> </span>.<span class='break'> </span>CanvasLayer</a></li>
+				
+					<li><a href="../symbols/enchant.CanvasScene.html">enchant<span class='break'> </span>.<span class='break'> </span>CanvasScene</a></li>
 				
 					<li><a href="../symbols/enchant.Class.html">enchant<span class='break'> </span>.<span class='break'> </span>Class</a></li>
 				
 					<li><a href="../symbols/enchant.Core.html">enchant<span class='break'> </span>.<span class='break'> </span>Core</a></li>
+				
+					<li><a href="../symbols/enchant.Deferred.html">enchant<span class='break'> </span>.<span class='break'> </span>Deferred</a></li>
+				
+					<li><a href="../symbols/enchant.DOMScene.html">enchant<span class='break'> </span>.<span class='break'> </span>DOMScene</a></li>
 				
 					<li><a href="../symbols/enchant.DOMSound.html">enchant<span class='break'> </span>.<span class='break'> </span>DOMSound</a></li>
 				
@@ -60,11 +70,21 @@
 				
 					<li><a href="../symbols/enchant.EventTarget.html">enchant<span class='break'> </span>.<span class='break'> </span>EventTarget</a></li>
 				
+					<li><a href="../symbols/enchant.Game.html">enchant<span class='break'> </span>.<span class='break'> </span>Game</a></li>
+				
 					<li><a href="../symbols/enchant.Group.html">enchant<span class='break'> </span>.<span class='break'> </span>Group</a></li>
+				
+					<li><a href="../symbols/enchant.InputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>InputManager</a></li>
+				
+					<li><a href="../symbols/enchant.InputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>InputSource</a></li>
+				
+					<li><a href="../symbols/enchant.KeyboardInputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>KeyboardInputManager</a></li>
+				
+					<li><a href="../symbols/enchant.KeyboardInputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>KeyboardInputSource</a></li>
 				
 					<li><a href="../symbols/enchant.Label.html">enchant<span class='break'> </span>.<span class='break'> </span>Label</a></li>
 				
-					<li><a href="../symbols/enchant.LoadingScene..html">enchant<span class='break'> </span>.<span class='break'> </span>LoadingScene<span class='break'> </span>.<span class='break'> </span></a></li>
+					<li><a href="../symbols/enchant.LoadingScene.html">enchant<span class='break'> </span>.<span class='break'> </span>LoadingScene</a></li>
 				
 					<li><a href="../symbols/enchant.Map.html">enchant<span class='break'> </span>.<span class='break'> </span>Map</a></li>
 				
@@ -91,7 +111,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2013-4-1 1:13
+		Generated on: 2014-2-28 18:40
 	</div>
 </div>
 
@@ -346,16 +366,16 @@
 					
 					
 						
-							<pre class="code">  var stage = new Group();
-  stage.addChild(player);
-  stage.addChild(enemy);
-  stage.addChild(map);
-  stage.addEventListener('enterframe', function() {
-     // Moves the entire frame in according to the player's coordinates.
-     if (this.x > 64 - player.x) {
-         this.x = 64 - player.x;
-     }
-  });</pre>
+							<pre class="code">var stage = new Group();
+stage.addChild(player);
+stage.addChild(enemy);
+stage.addChild(map);
+stage.addEventListener('enterframe', function() {
+    // Moves the entire frame in according to the player's coordinates.
+    if (this.x > 64 - player.x) {
+        this.x = 64 - player.x;
+    }
+});</pre>
 						
 					
 				
@@ -381,7 +401,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{<a href="../symbols/enchant.Node.html">enchant.Node</a>[]}</span>
 							
 							<b>childNodes</b>							
 						</div>
@@ -403,7 +423,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{<a href="../symbols/enchant.Node.html">enchant.Node</a>}</span>
 							
 							<b>firstChild</b>							
 						</div>
@@ -425,7 +445,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{<a href="../symbols/enchant.Node.html">enchant.Node</a>}</span>
 							
 							<b>lastChild</b>							
 						</div>
@@ -447,7 +467,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{Number}</span>
 							
 							<b>originX</b>							
 						</div>
@@ -469,7 +489,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{Number}</span>
 							
 							<b>originY</b>							
 						</div>
@@ -491,7 +511,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{Number}</span>
 							
 							<b>rotation</b>							
 						</div>
@@ -513,7 +533,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{Number}</span>
 							
 							<b>scaleX</b>							
 						</div>
@@ -534,9 +554,9 @@
 								
 									<dt class="heading">See:</dt>
 									
-										<dd>enchant.CanvasGroup.originX</dd>
+										<dd><a href="../symbols/enchant.Group.html#originX">enchant.Group#originX</a></dd>
 									
-										<dd>enchant.CanvasGroup.originY</dd>
+										<dd><a href="../symbols/enchant.Group.html#originY">enchant.Group#originY</a></dd>
 									
 								
 								
@@ -550,7 +570,7 @@
 							
 							</span>
 							
-							
+							<span class="light">{Number}</span>
 							
 							<b>scaleY</b>							
 						</div>
@@ -571,9 +591,9 @@
 								
 									<dt class="heading">See:</dt>
 									
-										<dd>enchant.CanvasGroup.originX</dd>
+										<dd><a href="../symbols/enchant.Group.html#originX">enchant.Group#originX</a></dd>
 									
-										<dd>enchant.CanvasGroup.originY</dd>
+										<dd><a href="../symbols/enchant.Group.html#originY">enchant.Group#originY</a></dd>
 									
 								
 								

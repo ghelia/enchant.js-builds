@@ -1,16 +1,14 @@
 /**
- * enchant.js v0.8.0
+ * enchant.js v0.8.1
  * http://enchantjs.com
  *
  * Copyright Ubiquitous Entertainment Inc.
  * Released under the MIT license.
  */
 
-(function(window, undefined){
+(function(window, undefined) {
 
-/**
- * ECMA-262 5th edition Functions
- */
+// ECMA-262 5th edition Functions
 if (typeof Object.defineProperty !== 'function') {
     Object.defineProperty = function(obj, prop, desc) {
         if ('value' in desc) {
@@ -88,9 +86,7 @@ window.getTime = (function() {
     }
 }());
 
-/**
- * define requestAnimationFrame
- */
+// define requestAnimationFrame
 window.requestAnimationFrame =
     window.requestAnimationFrame ||
     window.mozRequestAnimationFrame ||
@@ -117,13 +113,13 @@ window.requestAnimationFrame =
  * müssen die Plugin Bezeichner explizit als Argumente übergeben werden.
  *
  * @example
- *   enchant();     // alle Klassen werden exportiert.
- *   enchant('');   // nur Klassen die in enchant.js definiert sind werden exportiert.
- *   enchant('ui'); // enchant.js Klassen und ui.enchant.js Klassen werden exportiert.
+ * enchant();     // alle Klassen werden exportiert.
+ * enchant('');   // nur Klassen die in enchant.js definiert sind werden exportiert.
+ * enchant('ui'); // enchant.js Klassen und ui.enchant.js Klassen werden exportiert.
  *
  * @param {...String} [modules] Module die exportiert werden sollen.
+ * @function
  * @global
- * @type {Object}
  * @name enchant
  */
 var enchant = function(modules) {
@@ -171,9 +167,7 @@ var enchant = function(modules) {
     }
 };
 
-/**
- * export enchant
- */
+// export enchant
 window.enchant = enchant;
 
 window.addEventListener("message", function(msg, origin) {
@@ -208,10 +202,9 @@ window.addEventListener("message", function(msg, origin) {
  * @name enchant.Class
  * @class
  * Eine Klasse für Klassen, die Vererbung unterstützen.
- *
  * @param {Function} [superclass] Die Klasse, deren Klassendefinition
  * die neue Klasse erben wird.
- * @param {*} definition Klassendefinition.
+ * @param {*} [definition] Klassendefinition.
  * @constructor
  */
 enchant.Class = function(superclass, definition) {
@@ -227,52 +220,28 @@ enchant.Class = function(superclass, definition) {
  * Klasseninitialisierung sicherzustellen.
  *
  * @example
- *   var Ball = Class.create({ // definiert eine unabhängige Klasse.
- *       initialize: function(radius) { ... }, // Methodendefinitionen
- *       fall: function() { ... }
- *   });
+ * var Ball = Class.create({ // definiert eine unabhängige Klasse.
+ *     initialize: function(radius) { ... }, // Methodendefinitionen
+ *     fall: function() { ... }
+ * });
  *
  *   var Ball = Class.create(Sprite);  // definiert eine Klasse die von "Sprite" erbt.
  *   var Ball = Class.create(Sprite, { // definiert eine Klasse die von "Sprite" erbt.
  *       initialize: function(radius) { // überschreibt den Standardkonstruktor.
- *          Sprite.call(this, radius*2, radius*2); // Aufruf des Konstruktors der Basisklasse.
- *          this.image = core.assets['ball.gif'];
+ *           Sprite.call(this, radius * 2, radius * 2); // Aufruf des Konstruktors der Basisklasse.
+ *           this.image = core.assets['ball.gif'];
  *       }
  *   });
  *
  * @param {Function} [superclass] The class from which the
  * new class will inherit the class definition.
  * @param {*} [definition] Class definition.
- * Erstellt eine neue Klasse
- *
- * Wenn eine Klasse definiert wird, die von einer anderen Klasse erbt, wird der Konstruktor der
- * Basisklasse als Standard definiert. Sollte dieser Konstruktor in der neuen Klasse überschrieben
- * werden, sollte der vorherige Konstruktor explizit aufgerufen werden, um eine korrekte
- * Klasseninitialisierung sicherzustellen.
- * 
- * @example
- *   var Ball = Class.create({ // definiert eine unabhängige Klasse.
- *       initialize: function(radius) { ... }, // Methodendefinitionen
- *       fall: function() { ... }
- *   });
- *
- *   var Ball = Class.create(Sprite);  // definiert eine Klasse die von "Sprite" erbt.
- *   var Ball = Class.create(Sprite, { // definiert eine Klasse die von "Sprite" erbt.
- *       initialize: function(radius) { // überschreibt den Standardkonstruktor.
- *          Sprite.call(this, radius*2, radius*2); // Aufruf des Konstruktors der Basisklasse.
- *          this.image = core.assets['ball.gif'];
- *       }
- *   });
- *
- * @param {Function} [superclass] Die Klasse, deren Klassendefinition
- * die neue Klasse erben wird.
- * @param {*} definition Klassendefinition.
  * @static
  */
 enchant.Class.create = function(superclass, definition) {
-    if (superclass == null && definition){
+    if (superclass == null && definition) {
         throw new Error("superclass is undefined (enchant.Class.create)");
-    }else if(superclass == null){
+    } else if (superclass == null) {
         throw new Error("definition is undefined (enchant.Class.create)");
     }
 
@@ -320,8 +289,8 @@ enchant.Class.create = function(superclass, definition) {
 };
 
 /**
- * @param {ConstructorFunction}
- * @return {...ConstructorFunction}
+ * @param {Function}
+ * @return {Function[]}
  */
 enchant.Class.getInheritanceTree = function(Constructor) {
     var ret = [];
@@ -338,23 +307,44 @@ enchant.Class.getInheritanceTree = function(Constructor) {
 /**
  * @namespace
  * Umgebungsvariable.
- * @type {Object}
  */
 enchant.ENV = {
     /**
-     * Version of enchant.js
-     * @type {String}
+     * @type String
      */
-    VERSION: "0.6.1",
+    VERSION: '0.8.1',
     /**
-     * The CSS vendor prefix of the current browser.
-     * @type {String}
+     * @type String
+     */
+    BROWSER: (function(ua) {
+        if (/Eagle/.test(ua)) {
+            return 'eagle';
+        } else if (/Opera/.test(ua)) {
+            return 'opera';
+        } else if (/MSIE|Trident/.test(ua)) {
+            return 'ie';
+        } else if (/Chrome/.test(ua)) {
+            return 'chrome';
+        } else if (/(?:Macintosh|Windows).*AppleWebKit/.test(ua)) {
+            return 'safari';
+        } else if (/(?:iPhone|iPad|iPod).*AppleWebKit/.test(ua)) {
+            return 'mobilesafari';
+        } else if (/Firefox/.test(ua)) {
+            return 'firefox';
+        } else if (/Android/.test(ua)) {
+            return 'android';
+        } else {
+            return '';
+        }
+    }(navigator.userAgent)),
+    /**
+     * @type String
      */
     VENDOR_PREFIX: (function() {
         var ua = navigator.userAgent;
         if (ua.indexOf('Opera') !== -1) {
             return 'O';
-        } else if (ua.indexOf('MSIE') !== -1) {
+        } else if (/MSIE|Trident/.test(ua)) {
             return 'ms';
         } else if (ua.indexOf('WebKit') !== -1) {
             return 'webkit';
@@ -365,8 +355,7 @@ enchant.ENV = {
         }
     }()),
     /**
-     * Determines if the current browser supports touch.
-     * @type {Boolean} True, if touch is enabled.
+     * @type Boolean
      */
     TOUCH_ENABLED: (function() {
         var div = document.createElement('div');
@@ -374,8 +363,7 @@ enchant.ENV = {
         return typeof div.ontouchstart === 'function';
     }()),
     /**
-     * Determines if the current browser is an iPhone with a retina display.
-     * @return {Boolean} True, if this display is a retina display
+     * @type Boolean
      */
     RETINA_DISPLAY: (function() {
         if (navigator.userAgent.indexOf('iPhone') !== -1 && window.devicePixelRatio === 2) {
@@ -391,9 +379,7 @@ enchant.ENV = {
         }
     }()),
     /**
-     * Determines if for current browser Flash should be used to play 
-     * sound instead of the native audio class.
-     * @type {Boolean} True, if flash should be used.
+     * @type Boolean
      */
     USE_FLASH_SOUND: (function() {
         var ua = navigator.userAgent;
@@ -402,24 +388,18 @@ enchant.ENV = {
         return (location.href.indexOf('http') === 0 && ua.indexOf('Mobile') === -1 && vendor.indexOf('Apple') !== -1);
     }()),
     /**
-     * If click/touch event occure for these tags the setPreventDefault() method will not be called.
+     * @type String[]
      */
     USE_DEFAULT_EVENT_TAGS: ['input', 'textarea', 'select', 'area'],
+    /**
+     * @type String[]
+     */
     CANVAS_DRAWING_METHODS: [
         'putImageData', 'drawImage', 'drawFocusRing', 'fill', 'stroke',
         'clearRect', 'fillRect', 'strokeRect', 'fillText', 'strokeText'
     ],
     /**
-     * Keybind Table.
-     * You can use 'left', 'up', 'right', 'down', 'a', 'b' for preset event.
-     * @example
-     * enchant.ENV.KEY_BIND_TABLE = {
-     *    37: 'left',
-     *    38: 'up',
-     *    39: 'right',
-     *    40: 'down',
-     *    32: 'a', //-> use 'space' key as 'a button'
-     * }
+     * @type Object
      */
     KEY_BIND_TABLE: {
         37: 'left',
@@ -427,19 +407,22 @@ enchant.ENV = {
         39: 'right',
         40: 'down'
     },
+    /**
+     * @type Number[]
+     */
     PREVENT_DEFAULT_KEY_CODES: [37, 38, 39, 40, 32],
     /**
-     * @type {Boolean}
+     * @type Boolean
      */
-    SOUND_ENABLED_ON_MOBILE_SAFARI: false,
+    SOUND_ENABLED_ON_MOBILE_SAFARI: true,
     /**
-     * Determines if WebAudioAPI is enabled. (true: use WebAudioAPI instead of Audio element if possible)
+     * @type Boolean
      */
-    USE_WEBAUDIO: (function(){
+    USE_WEBAUDIO: (function() {
         return location.protocol !== 'file:';
     }()),
     /**
-     * Determines if animation feature is enabled. (true: Timeline instance will be generated in new Node)
+     * @type Boolean
      */
     USE_ANIMATION: true
 };
@@ -460,32 +443,32 @@ enchant.Event = enchant.Class.create({
     initialize: function(type) {
         /**
          * Typ des Ereignis.
-         * @type {String}
+         * @type String
          */
         this.type = type;
         /**
          * Ziel des Ereignis.
-         * @type {*}
+         * @type *
          */
         this.target = null;
         /**
          * X Koordinate des Auftretens des Ereignis.
-         * @type {Number}
+         * @type Number
          */
         this.x = 0;
         /**
          * Y Koordinate des Auftretens des Ereignis.
-         * @type {Number}
+         * @type Number
          */
         this.y = 0;
         /**
          * X Koordinate des lokalen Koordinatensystems des Auftretens des Ereignis.
-         * @type {Number}
+         * @type Number
          */
         this.localX = 0;
         /**
          * Y Koordinate des lokalen Koordinatensystems des Auftretens des Ereignis.
-         * @type {Number}
+         * @type Number
          */
         this.localY = 0;
     },
@@ -504,22 +487,24 @@ enchant.Event = enchant.Class.create({
  * Objekt des Auftretens: {@link enchant.Core}
  *
  * @example
- *   var core = new Core(320, 320);
- *   core.preload('player.gif');
- *   core.onload = function() {
- *      ... // initialisierung des Spieles 
- *   };
- *   core.start();
- * @type {String}
+ * var core = new Core(320, 320);
+ * core.preload('player.gif');
+ * core.onload = function() {
+ *     ... // initialisierung des Spieles 
+ * };
+ * core.start();
+ * @type String
  */
 enchant.Event.LOAD = 'load';
 
 /**
+ * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Surface}, {@link enchant.WebAudioSound}, {@link enchant.DOMSound}
  */
 enchant.Event.ERROR = 'error';
 
 /**
- @type {String}
+ * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
+ @type String
  */
 enchant.Event.CORE_RESIZE = 'coreresize';
 
@@ -527,21 +512,21 @@ enchant.Event.CORE_RESIZE = 'coreresize';
  * Ereignis, welches während des Ladens des Spieles auftritt.
  * Das Ereignis tritt jedesmal auf, wenn eine im voraus geladene Grafik geladen wurde.
  * Objekt des Auftretens: {@link enchant.LoadingScene}
- * @type {String}
+ * @type String
  */
 enchant.Event.PROGRESS = 'progress';
 
 /**
  * Ereignis, welches auftritt wenn ein neuer Frame bearbeitet wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.ENTER_FRAME = 'enterframe';
 
 /**
  * Ereignis, welches auftritt wenn ein Frame beendet wird.
  * Objekt des Auftretens: {@link enchant.Core}
- * @type {String}
+ * @type String
  */
 enchant.Event.EXIT_FRAME = 'exitframe';
 
@@ -549,7 +534,7 @@ enchant.Event.EXIT_FRAME = 'exitframe';
  * Ereignis, dass auftritt wenn eine neue Szene
  * ({@link enchant.Scene}) beginnt.
  * Objekt des Auftretens: {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.ENTER = 'enter';
 
@@ -557,7 +542,7 @@ enchant.Event.ENTER = 'enter';
  * Ereignis, dass auftritt wenn eine Szene
  * ({@link enchant.Scene}) endet.
  * Objekt des Auftretens: {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.EXIT = 'exit';
 
@@ -565,7 +550,7 @@ enchant.Event.EXIT = 'exit';
  * Ereignis, welchses auftritt wenn ein Kindelement zu einem Node
  * hinzugefügt wird.
  * Objekt des Auftretens: {@link enchant.Group}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.CHILD_ADDED = 'childadded';
 
@@ -573,7 +558,7 @@ enchant.Event.CHILD_ADDED = 'childadded';
  * Ereignis, welchses auftritt wenn der Node zu einer Gruppe
  * hinzugefügt wird.
  * Objekt des Auftretens: {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.ADDED = 'added';
 
@@ -581,7 +566,7 @@ enchant.Event.ADDED = 'added';
  * Ereignis, welchses auftritt wenn der Node zu einer Szene
  * hinzugefügt wird.
  * Objekt des Auftretens: {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.ADDED_TO_SCENE = 'addedtoscene';
 
@@ -589,7 +574,7 @@ enchant.Event.ADDED_TO_SCENE = 'addedtoscene';
  * Ereignis, welchses auftritt wenn ein Kindelement von einem Node
  * entfernt wird.
  * Objekt des Auftretens: {@link enchant.Group}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.CHILD_REMOVED = 'childremoved';
 
@@ -597,7 +582,7 @@ enchant.Event.CHILD_REMOVED = 'childremoved';
  * Ereignis, welchses auftritt wenn der Node aus einer Gruppe
  * entfernt wird.
  * Objekt des Auftretens: {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.REMOVED = 'removed';
 
@@ -605,7 +590,7 @@ enchant.Event.REMOVED = 'removed';
  * Ereignis, welchses auftritt wenn der Node aus einer Szene
  * entfernt wird.
  * Objekt des Auftretens: {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.REMOVED_FROM_SCENE = 'removedfromscene';
 
@@ -613,7 +598,7 @@ enchant.Event.REMOVED_FROM_SCENE = 'removedfromscene';
  * Ereignis, welchses auftritt wenn ein Touch auf einen Node
  * beginnt. Klicks werden als Touch behandelt.
  * Objekt des Auftretens: {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.TOUCH_START = 'touchstart';
 
@@ -621,7 +606,7 @@ enchant.Event.TOUCH_START = 'touchstart';
  * Ereignis, welchses auftritt wenn ein Touch auf einen Node
  * bewegt wurde. Klicks werden als Touch behandelt.
  * Objekt des Auftretens: {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.TOUCH_MOVE = 'touchmove';
 
@@ -629,7 +614,7 @@ enchant.Event.TOUCH_MOVE = 'touchmove';
  * Ereignis, welchses auftritt wenn ein Touch auf einen Node
  * endet. Klicks werden als Touch behandelt.
  * Objekt des Auftretens: {@link enchant.Node}
- * @type {String}
+ * @type String
  */
 enchant.Event.TOUCH_END = 'touchend';
 
@@ -637,151 +622,152 @@ enchant.Event.TOUCH_END = 'touchend';
  * Ereignis, welchses auftritt wenn eine Entity
  * gerendert wird.
  * Objekt des Auftretens: {@link enchant.Entity}
- * @type {String}
+ * @type String
  */
 enchant.Event.RENDER = 'render';
 
 /**
  * Ereignis, welchses auftritt wenn ein Knopf gedückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.INPUT_START = 'inputstart';
 
 /**
  * Ereignis, welchses auftritt wenn eine Knopfeingabe verändert wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.INPUT_CHANGE = 'inputchange';
 
 /**
  * Ereignis, welchses auftritt wenn eine Knopf losgelassen wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.INPUT_END = 'inputend';
 
 /**
- * @type {String}
+ * @type String
  */
 enchant.Event.INPUT_STATE_CHANGED = 'inputstatechanged';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Links"-Knopf gedrückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.LEFT_BUTTON_DOWN = 'leftbuttondown';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Links"-Knopf losgelassen wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.LEFT_BUTTON_UP = 'leftbuttonup';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Rechts"-Knopf gedrückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.RIGHT_BUTTON_DOWN = 'rightbuttondown';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Rechts"-Knopf losgelassen wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.RIGHT_BUTTON_UP = 'rightbuttonup';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Oben"-Knopf gedrückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.UP_BUTTON_DOWN = 'upbuttondown';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Oben"-Knopf losgelassen wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.UP_BUTTON_UP = 'upbuttonup';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Unten"-Knopf gedrückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.DOWN_BUTTON_DOWN = 'downbuttondown';
 
 /**
  * Ereignis, welchses auftritt wenn der "Nach Unten"-Knopf losgelassen wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.DOWN_BUTTON_UP = 'downbuttonup';
 
 /**
  * Ereignis, welchses auftritt wenn der "A"-Knopf gedrückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.A_BUTTON_DOWN = 'abuttondown';
 
 /**
  * Ereignis, welchses auftritt wenn der "A"-Knopf losgelassen wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.A_BUTTON_UP = 'abuttonup';
 
 /**
  * Ereignis, welchses auftritt wenn der "B"-Knopf gedrückt wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.B_BUTTON_DOWN = 'bbuttondown';
 
 /**
  * Ereignis, welchses auftritt wenn der "B"-Knopf losgelassen wird.
  * Objekt des Auftretens: {@link enchant.Core}, {@link enchant.Scene}
- * @type {String}
+ * @type String
  */
 enchant.Event.B_BUTTON_UP = 'bbuttonup';
 
 /**
+ * @type String
  */
 enchant.Event.ADDED_TO_TIMELINE = "addedtotimeline";
 
 /**
- * @type {String}
+ * @type String
  */
 enchant.Event.REMOVED_FROM_TIMELINE = "removedfromtimeline";
 
 /**
- * @type {String}
+ * @type String
  */
 enchant.Event.ACTION_START = "actionstart";
 
 /**
- * @type {String}
+ * @type String
  */
 enchant.Event.ACTION_END = "actionend";
 
 /**
- * @type {String}
+ * @type String
  */
 enchant.Event.ACTION_TICK = "actiontick";
 
 /**
- * @type {String}
+ * @type String
  */
 enchant.Event.ACTION_ADDED = "actionadded";
 
 /**
- * @type {String}
+ * @type String
  */
 enchant.Event.ACTION_REMOVED = "actionremoved";
 
@@ -795,7 +781,6 @@ enchant.EventTarget = enchant.Class.create({
      * Eine Klasse für eine unabhängige Implementierung von Ereignissen 
      * (Events), ähnlich wie DOM Events.
      * Jedoch wird das Phasenkonzept nicht unterstützt.
-     * @extends {enchant.Event}
      * @constructs
      */
     initialize: function() {
@@ -805,7 +790,7 @@ enchant.EventTarget = enchant.Class.create({
      * Fügt einen neuen Ereignisbeobachter hinzu, welcher beim Auftreten des
      * Events ausgeführt wird.
      * @param {String} type Ereignis Typ.
-     * @param {function(e:enchant.Event)} listener Der Ereignisbeobachter 
+     * @param {Function(e:enchant.Event)} listener Der Ereignisbeobachter 
      * der hinzugefügt wird.
      */
     addEventListener: function(type, listener) {
@@ -818,18 +803,19 @@ enchant.EventTarget = enchant.Class.create({
         }
     },
     /**
-     * Synonym for addEventListener
-     * @see {enchant.EventTarget#addEventListener}
-     * @param {String} type Type of the events.
-     * @param {function(e:enchant.Event)} listener Event listener to be added.
+     * Synonym für addEventListener.
+     * @param {String} type Ereignis Typ.
+     * @param {Function(e:enchant.Event)} listener Der Ereignisbeobachter 
+     * der hinzugefügt wird.
+     * @see enchant.EventTarget#addEventListener
      */
     on: function() {
         this.addEventListener.apply(this, arguments);
     },
     /**
      * Entfernt einen Ereignisbeobachter.
-     * @param {String} type Ereignis Typ.
-     * @param {function(e:enchant.Event)} listener Der Ereignisbeobachter 
+     * @param {String} [type] Ereignis Typ.
+     * @param {Function(e:enchant.Event)} listener Der Ereignisbeobachter 
      * der entfernt wird.
      */
     removeEventListener: function(type, listener) {
@@ -845,7 +831,7 @@ enchant.EventTarget = enchant.Class.create({
      * Entfernt alle Ereignisbeobachter für einen Typ.
      * Wenn kein Typ gegeben ist, werden alle 
      * Ereignisbeobachter entfernt.
-     * @param [String] type Ereignis Typ.
+     * @param {String} type Ereignis Typ.
      */
     clearEventListener: function(type) {
         if (type != null) {
@@ -875,9 +861,6 @@ enchant.EventTarget = enchant.Class.create({
     }
 });
 
-/**
- * @scope enchant.Core.prototype
- */
 (function() {
     var core;
     /**
@@ -894,8 +877,8 @@ enchant.EventTarget = enchant.Class.create({
          * Auf die aktuell existierende Instanz kann über die {@link enchant.Core.instance}
          * Variable zugegriffen werden.
          *
-         * @param {Number} width Die Breite des Spieles.
-         * @param {Number} height Die Höhe des Spieles.
+         * @param {Number} [width=320] Die Breite des Spieles.
+         * @param {Number} [height=320] Die Höhe des Spieles.
          * @constructs
          * @extends enchant.EventTarget
          */
@@ -975,27 +958,27 @@ enchant.EventTarget = enchant.Class.create({
 
             /**
              * Frame Rate des Spieles.
-             * @type {Number}
+             * @type Number
              */
             this.fps = 30;
             /**
              * Anzahl der Frames seit dem Spielestart.
-             * @type {Number}
+             * @type Number
              */
             this.frame = 0;
             /**
              * Zeigt an ob das Spiel ausgeführt werden kann.
-             * @type {Boolean}
+             * @type Boolean
              */
             this.ready = false;
             /**
              * Zeigt an ob das Spiel derzeit ausgeführt wird.
-             * @type {Boolean}
+             * @type Boolean
              */
             this.running = false;
             /**
              * Geladene Objekte werden unter dem Pfad als Schlüssel in diesem Objekt abgelegt.
-             * @type {Object.<String, Surface>}
+             * @type Object
              */
             this.assets = {};
             var assets = this._assets = [];
@@ -1015,24 +998,27 @@ enchant.EventTarget = enchant.Class.create({
             /**
              * Die aktuell dargestellte Szene.
              * Diese Szene befindet sich oben auf dem Stapelspeicher.
-             * @type {enchant.Scene}
+             * @type enchant.Scene
              */
             this.currentScene = null;
             /**
              * Die Ursprungsszene.
              * Diese Szene befindet sich unten auf dem Stapelspeicher.
-             * @type {enchant.Scene}
+             * @type enchant.Scene
              */
             this.rootScene = new enchant.Scene();
             this.pushScene(this.rootScene);
             /**
              * Die Szene, welche während des Ladevorgangs dargestellt wird.
-             * @type {enchant.Scene}
+             * @type enchant.Scene
              */
             this.loadingScene = new enchant.LoadingScene();
 
             /**
-             * @type {Boolean}
+             [/lang:ja]
+             * Indicates whether or not {@link enchant.Core#start} has been called.
+             [/lang]
+             * @type Boolean
              * @private
              */
             this._activated = false;
@@ -1042,7 +1028,7 @@ enchant.EventTarget = enchant.Class.create({
 
             /**
              * Objekt, welches den aktuellen Eingabestatus des Spieles speichert.
-             * @type {Object.<String, Boolean>}
+             * @type Object
              */
             this.input = {};
 
@@ -1202,7 +1188,7 @@ enchant.EventTarget = enchant.Class.create({
         },
         /**
          * Breite des Spieles.
-         * @type {Number}
+         * @type Number
          */
         width: {
             get: function() {
@@ -1215,7 +1201,7 @@ enchant.EventTarget = enchant.Class.create({
         },
         /**
          * Höhe des Spieles.
-         * @type {Number}
+         * @type Number
          */
         height: {
             get: function() {
@@ -1228,7 +1214,7 @@ enchant.EventTarget = enchant.Class.create({
         },
         /**
          * Skalierung der Spieldarstellung.
-         * @type {Number}
+         * @type Number
          */
         scale: {
             get: function() {
@@ -1271,15 +1257,15 @@ enchant.EventTarget = enchant.Class.create({
          * Für diesen Fall ist auf die {@link enchant.Surface.load} Dokumentation zu verweisen.
          *
          * @example
-         *   core.preload('player.gif');
-         *   core.onload = function() {
-         *      var sprite = new Sprite(32, 32);
-         *      sprite.image = core.assets['player.gif']; // zugriff mittels Dateipfades
-         *      ...
-         *   };
-         *   core.start();
+         * core.preload('player.gif');
+         * core.onload = function() {
+         *     var sprite = new Sprite(32, 32);
+         *     sprite.image = core.assets['player.gif']; // zugriff mittels Dateipfades
+         *     ...
+         * };
+         * core.start();
          *
-         * @param {...String} assets Pfade zu den Dateien die im voraus geladen werden sollen.
+         * @param {...String|String[]} assets Pfade zu den Dateien die im voraus geladen werden sollen.
          * Mehrfachangaben möglich.
          * @return {enchant.Core} this
          */
@@ -1304,8 +1290,11 @@ enchant.EventTarget = enchant.Class.create({
         /**
          * Laden von Dateien.
          *
-         * @param {String} asset Pfad zu der Datei die geladen werden soll.
+         * @param {String} src Pfad zu der Datei die geladen werden soll.
+         * @param {String} [alias]
          * @param {Function} [callback] Funktion die ausgeführt wird wenn das laden abgeschlossen wurde.
+         * @param {Function} [onerror]
+         * @return {enchant.Deferred}
          */
         load: function(src, alias, callback, onerror) {
             var assetName, offset;
@@ -1352,7 +1341,7 @@ enchant.EventTarget = enchant.Class.create({
                                 core.assets[assetName] = enchant.Sound.load(src, type, _callback, _onerror);
                             } else {
                                 core.assets[assetName] = req.responseText;
-                                _callback.call(enchant.Core.instance, new enchant.Event('laod'));
+                                _callback.call(enchant.Core.instance, new enchant.Event('load'));
                             }
                         }
                     };
@@ -1367,7 +1356,7 @@ enchant.EventTarget = enchant.Class.create({
          * Je nach der Frame Rate definiert in {@link enchant.Core#fps}, wird der Frame in der
          * {@link enchant.Core#currentScene} aktualisiert. Sollten Dateien die im voraus geladen werden
          * sollen vorhanden sein, beginnt das laden dieser Dateien und der Ladebildschirm wird dargestellt.
-         * @return {enchant.Deferred} Deferred
+         * @return {enchant.Deferred}
          */
         start: function(deferred) {
             var onloadTimeSetter = function() {
@@ -1458,9 +1447,9 @@ enchant.EventTarget = enchant.Class.create({
         /**
          * Startet den Debug-Modus des Spieles.
          *
-         * Auch wenn die enchant.Core.instance._debug Variable gesetzt ist,
+         * Auch wenn die {@link enchant.Core#_debug} Variable gesetzt ist,
          * kann der Debug-Modus gestartet werden.
-         * @return {enchant.Deferred} Deferred
+         * @return {enchant.Deferred}
          */
         debug: function() {
             this._debug = true;
@@ -1490,6 +1479,7 @@ enchant.EventTarget = enchant.Class.create({
             }
         },
         /**
+         * @param {Number} time
          * @private
          */
         _callTick: function(time) {
@@ -1530,7 +1520,7 @@ enchant.EventTarget = enchant.Class.create({
          * Stoppt das Spiel.
          *
          * Der Frame wird nicht mehr aktualisiert und Spielereingaben werden nicht
-         * mehr akzeptiert. Das spiel kann mit der {@link enchant.Core#start} Methode
+         * mehr akzeptiert. Das spiel kann mit der {@link enchant.Core#resume} Methode
          * erneut gestartet werden.
          */
         stop: function() {
@@ -1541,7 +1531,7 @@ enchant.EventTarget = enchant.Class.create({
          * Stoppt das Spiel.
          *
          * Der Frame wird nicht mehr aktualisiert und Spielereingaben werden nicht
-         * mehr akzeptiert. Das spiel kann mit der {@link enchant.Core#start} Methode
+         * mehr akzeptiert. Das spiel kann mit der {@link enchant.Core#resume} Methode
          * erneut gestartet werden.
          */
         pause: function() {
@@ -1669,7 +1659,7 @@ enchant.EventTarget = enchant.Class.create({
             this.keyboardInputManager.changeState(button, bool);
         },
         /**
-         * Liefert die vergange Spielzeit (keine reale) die seit dem Aufruf von core.start
+         * Liefert die vergange Spielzeit (keine reale) die seit dem Aufruf von {@link enchant.Core#start}
          * vergangen ist.
          * @return {Number} Die vergangene Zeit (Sekunden)
          */
@@ -1681,7 +1671,7 @@ enchant.EventTarget = enchant.Class.create({
     /**
      * @static
      * @private
-     * @type {Object.<String, Function>}
+     * @type Object
      */
     enchant.Core._loadFuncs = {};
     enchant.Core._loadFuncs['jpg'] =
@@ -1700,8 +1690,7 @@ enchant.EventTarget = enchant.Class.create({
                     };
 
     /**
-     * Get the file extension from a path
-     * @param path
+     * @param {String} path
      * @return {*}
      */
     enchant.Core.findExt = function(path) {
@@ -1719,17 +1708,20 @@ enchant.EventTarget = enchant.Class.create({
 
     /**
      * Die aktuelle Instanz des Spieles.
-     * @type {enchant.Core}
+     * @type enchant.Core
      * @static
      */
     enchant.Core.instance = null;
 }());
 
 /**
- * enchant.Core is moved to enchant.Core from v0.6
- * @type {*}
+ * @name enchant.Game
+ * @class
+ * enchant.Game is moved to {@link enchant.Core} from v0.6
+ * @deprecated
  */
 enchant.Game = enchant.Core;
+
 /**
  * @scope enchant.InputManager.prototype
  */
@@ -1737,6 +1729,8 @@ enchant.InputManager = enchant.Class.create(enchant.EventTarget, {
     /**
      * @name enchant.InputManager
      * @class
+     * @param {*} valueStore
+     * @param {*} [source=this]
      * @constructs
      * @extends enchant.EventTarget
      */
@@ -1744,15 +1738,15 @@ enchant.InputManager = enchant.Class.create(enchant.EventTarget, {
         enchant.EventTarget.call(this);
 
         /**
-         * @type {enchant.EventTarget[]}
+         * @type enchant.EventTarget[]
          */
         this.broadcastTarget = [];
         /**
-         * @type {Object}
+         * @type Object
          */
         this.valueStore = valueStore;
         /**
-         * @type {Object}
+         * @type Object
          */
         this.source = source || this;
 
@@ -1765,18 +1759,22 @@ enchant.InputManager = enchant.Class.create(enchant.EventTarget, {
         }.bind(this);
     },
     /**
+     * @param {enchant.InputSource} inputSource
+     * @param {String} name
      */
     bind: function(inputSource, name) {
         inputSource.addEventListener(enchant.Event.INPUT_STATE_CHANGED, this._stateHandler);
         this._binds[inputSource.identifier] = name;
     },
     /**
+     * @param {enchant.InputSource} inputSource
      */
     unbind: function(inputSource) {
         inputSource.removeEventListener(enchant.Event.INPUT_STATE_CHANGED, this._stateHandler);
         delete this._binds[inputSource.identifier];
     },
     /**
+     * @param {enchant.EventTarget} eventTarget
      */
     addBroadcastTarget: function(eventTarget) {
         var i = this.broadcastTarget.indexOf(eventTarget);
@@ -1785,6 +1783,7 @@ enchant.InputManager = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
+     * @param {enchant.EventTarget} eventTarget
      */
     removeBroadcastTarget: function(eventTarget) {
         var i = this.broadcastTarget.indexOf(eventTarget);
@@ -1793,6 +1792,7 @@ enchant.InputManager = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
+     * @param {enchant.Event} e
      */
     broadcastEvent: function(e) {
         var target = this.broadcastTarget;
@@ -1801,6 +1801,8 @@ enchant.InputManager = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
+     * @param {String} name
+     * @param {*} data
      */
     changeState: function(name, data) {
     }
@@ -1813,14 +1815,19 @@ enchant.InputSource = enchant.Class.create(enchant.EventTarget, {
     /**
      * @name enchant.InputSource
      * @class
+     * @param {String} identifier
      * @constructs
      * @extends enchant.EventTarget
      */
     initialize: function(identifier) {
         enchant.EventTarget.call(this);
+        /**
+         * @type String
+         */
         this.identifier = identifier;
     },
     /**
+     * @param {*} data
      */
     notifyStateChange: function(data) {
         var e = new enchant.Event(enchant.Event.INPUT_STATE_CHANGED);
@@ -1837,25 +1844,31 @@ enchant.BinaryInputManager = enchant.Class.create(enchant.InputManager, {
     /**
      * @name enchant.BinaryInputManager
      * @class
+     * @param {*} flagStore
+     * @param {String} activeEventNameSuffix
+     * @param {String} inactiveEventNameSuffix
+     * @param {*} [source=this] source
      * @constructs
      * @extends enchant.InputManager
      */
     initialize: function(flagStore, activeEventNameSuffix, inactiveEventNameSuffix, source) {
         enchant.InputManager.call(this, flagStore, source);
         /**
-         * @type {Number}
+         * @type Number
          */
         this.activeInputsNum = 0;
         /**
-         * @type {String}
+         * @type String
          */
         this.activeEventNameSuffix = activeEventNameSuffix;
         /**
-         * @type {String}
+         * @type String
          */
         this.inactiveEventNameSuffix = inactiveEventNameSuffix;
     },
     /**
+     * @param {enchant.BinaryInputSource} inputSource
+     * @param {String} name
      * @see enchant.InputManager#bind
      */
     bind: function(binaryInputSource, name) {
@@ -1863,6 +1876,7 @@ enchant.BinaryInputManager = enchant.Class.create(enchant.InputManager, {
         this.valueStore[name] = false;
     },
     /**
+     * @param {enchant.BinaryInputSource} inputSource
      * @see enchant.InputManager#unbind
      */
     unbind: function(binaryInputSource) {
@@ -1871,6 +1885,8 @@ enchant.BinaryInputManager = enchant.Class.create(enchant.InputManager, {
         delete this.valueStore[name];
     },
     /**
+     * @param {String} name
+     * @param {Boolean} bool
      */
     changeState: function(name, bool) {
         if (bool) {
@@ -1912,6 +1928,7 @@ enchant.BinaryInputSource = enchant.Class.create(enchant.InputSource, {
     /**
      * @name enchant.BinaryInputSource
      * @class
+     * @param {String} identifier
      * @constructs
      * @extends enchant.InputSource
      */
@@ -1927,6 +1944,8 @@ enchant.KeyboardInputManager = enchant.Class.create(enchant.BinaryInputManager, 
     /**
      * @name enchant.KeyboardInputManager
      * @class
+     * @param {HTMLElement} dom
+     * @param {*} flagStore
      * @constructs
      * @extends enchant.BinaryInputManager
      */
@@ -1936,17 +1955,20 @@ enchant.KeyboardInputManager = enchant.Class.create(enchant.BinaryInputManager, 
         this._attachDOMEvent(domElement, 'keyup', false);
     },
     /**
+     * @param {Number} keyCode
+     * @param {String} name
      */
     keybind: function(keyCode, name) {
         this.bind(enchant.KeyboardInputSource.getByKeyCode('' + keyCode), name);
     },
     /**
+     * @param {Number} keyCode
      */
     keyunbind: function(keyCode) {
         this.unbind(enchant.KeyboardInputSource.getByKeyCode('' + keyCode));
     },
     _attachDOMEvent: function(domElement, eventType, state) {
-        domElement.addEventListener(eventType,  function(e) {
+        domElement.addEventListener(eventType, function(e) {
             var core = enchant.Core.instance;
             if (!core || !core.running) {
                 return;
@@ -1967,6 +1989,7 @@ enchant.KeyboardInputSource = enchant.Class.create(enchant.BinaryInputSource, {
     /**
      * @name enchant.KeyboardInputSource
      * @class
+     * @param {String} keyCode
      * @constructs
      * @extends enchant.BinaryInputSource
      */
@@ -1980,6 +2003,7 @@ enchant.KeyboardInputSource = enchant.Class.create(enchant.BinaryInputSource, {
 enchant.KeyboardInputSource._instances = {};
 /**
  * @static
+ * @param {Number} keyCode
  * @return {enchant.KeyboardInputSource} instance.
  */
 enchant.KeyboardInputSource.getByKeyCode = function(keyCode) {
@@ -2016,18 +2040,18 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
 
         /**
          * Das Alter (Frames) dieses Nodes welches vor dem {@link enchant.Event.ENTER_FRAME} Ereignis erhöht wird.
-         * @type {Number}
+         * @type Number
          */
         this.age = 0;
 
         /**
          * Der Eltern-Node dieses Node.
-         * @type {enchant.Group}
+         * @type enchant.Group
          */
         this.parentNode = null;
         /**
          * Die Szene, zu welcher dieser Node gehört.
-         * @type {enchant.Scene}
+         * @type enchant.Scene
          */
         this.scene = null;
 
@@ -2047,10 +2071,9 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
             }
         });
 
-        /**
-         */
-        if(enchant.ENV.USE_ANIMATION){
-            var tl = this.tl = new enchant.Timeline(this);
+        // Nodeが生成される際に, tl プロパティに Timeline オブジェクトを追加している.
+        if (enchant.ENV.USE_ANIMATION) {
+            this.tl = new enchant.Timeline(this);
         }
     },
     /**
@@ -2075,7 +2098,7 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
     },
     /**
      * Die x Koordinaten des Nodes.
-     * @type {Number}
+     * @type Number
      */
     x: {
         get: function() {
@@ -2088,7 +2111,7 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
     },
     /**
      * Die y Koordinaten des Nodes.
-     * @type {Number}
+     * @type Number
      */
     y: {
         get: function() {
@@ -2250,7 +2273,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         this._style = {};
         this.__styleStatus = {};
 
+        this._isContainedInCollection = false;
+
         /**
+         * @type String
          */
         this.compositeOperation = null;
 
@@ -2259,13 +2285,13 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
          * Bei einem Klick oder Touch wird das entsprechende
          * Button Ereignis (Event) ausgelöst.
          * Mögliche buttonModes sind: left, right, up, down, a, b. 
-         * @type {String}
+         * @type String
          */
         this.buttonMode = null;
         /**
          * Zeigt an, ob auf die Entity geklickt wurde.
          * Funktioniert nur wenn {@link enchant.Entity.buttonMode} gesetzt ist.
-         * @type {Boolean}
+         * @type Boolean
          */
         this.buttonPressed = false;
         this.addEventListener('touchstart', function() {
@@ -2289,7 +2315,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
     },
     /**
      * Die Breite der Entity.
-     * @type {Number}
+     * @type Number
      */
     width: {
         get: function() {
@@ -2302,7 +2328,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
     },
     /**
      * Die Höhe der Entity.
-     * @type {Number}
+     * @type Number
      */
     height: {
         get: function() {
@@ -2316,7 +2342,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
     /**
      * Die Hintergrundfarbe der Entity.
      * Muss im gleichen Format definiert werden wie das CSS 'color' Attribut.
-     * @type {String}
+     * @type String
      */
     backgroundColor: {
         get: function() {
@@ -2327,7 +2353,9 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         }
     },
     /**
-     * @type {String}
+     * Die debug-farbe der Entity.
+     * Muss im gleichen Format definiert werden wie das CSS 'color' Attribut.
+     * @type String
      */
     debugColor: {
         get: function() {
@@ -2341,7 +2369,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
      * Transparenz der Entity.
      * Definiert den Level der Transparenz von 0 bis 1
      * (0 ist komplett transparent, 1 ist vollständig deckend).
-     * @type {Number}
+     * @type Number
      */
     opacity: {
         get: function() {
@@ -2353,7 +2381,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
     },
     /**
      * Zeigt an, ob die Entity dargestellt werden soll oder nicht.
-     * @type {Boolean}
+     * @type Boolean
      */
     visible: {
         get: function() {
@@ -2364,8 +2392,8 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         }
     },
     /**
-     * Definiert ob auf die Entity geklickt werden kann. 
-     * @type {Boolean}
+     * Definiert ob auf die Entity geklickt werden kann.
+     * @type Boolean
      */
     touchEnabled: {
         get: function() {
@@ -2503,8 +2531,9 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         var _;
         return (_ = this._offsetX - other._offsetX + (this.width - other.width) / 2) * _ +
             (_ = this._offsetY - other._offsetY + (this.height - other.height) / 2) * _ < distance * distance;
-    }, /**
-     * Vergrößert oder verkleinert dieses Sprite.
+    },
+    /**
+     * Vergrößert oder verkleinert dieses Entity.
      * @param {Number} x Skalierungsfaktor auf der x-Achse.
      * @param {Number} [y] Skalierungsfaktor auf der y-Achse.
      */
@@ -2514,7 +2543,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         this._dirty = true;
     },
     /**
-     * Rotiert dieses Sprite.
+     * Rotiert dieses Entity.
      * @param {Number} deg Rotationswinkel (Grad).
      */
     rotate: function(deg) {
@@ -2522,8 +2551,8 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         this._dirty = true;
     },
     /**
-     * Skalierungsfaktor auf der x-Achse dieses Sprites.
-     * @type {Number}
+     * Skalierungsfaktor auf der x-Achse dieses Entity.
+     * @type Number
      */
     scaleX: {
         get: function() {
@@ -2535,8 +2564,8 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         }
     },
     /**
-     * Skalierungsfaktor auf der y-Achse dieses Sprites.
-     * @type {Number}
+     * Skalierungsfaktor auf der y-Achse dieses Entity.
+     * @type Number
      */
     scaleY: {
         get: function() {
@@ -2548,8 +2577,8 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         }
     },
     /**
-     * Rotationswinkel des Sprites (Grad).
-     * @type {Number}
+     * Rotationswinkel des Entity (Grad).
+     * @type Number
      */
     rotation: {
         get: function() {
@@ -2562,7 +2591,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
     },
     /**
      * Ausgangspunkt für Rotation und Skalierung.
-     * @type {Number}
+     * @type Number
      */
     originX: {
         get: function() {
@@ -2575,7 +2604,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
     },
     /**
      * Ausgangspunkt für Rotation und Skalierung.
-     * @type {Number}
+     * @type Number
      */
     originY: {
         get: function() {
@@ -2605,12 +2634,22 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
         }
     },
     _addSelfToCollection: function() {
+        if (this._isContainedInCollection) {
+            return;
+        }
+
         var Constructor = this.getConstructor();
         Constructor._collectionTarget.forEach(function(C) {
             C.collection.push(this);
         }, this);
+
+        this._isContainedInCollection = true;
     },
     _removeSelfFromCollection: function() {
+        if (!this._isContainedInCollection) {
+            return;
+        }
+
         var Constructor = this.getConstructor();
         Constructor._collectionTarget.forEach(function(C) {
             var i = C.collection.indexOf(this);
@@ -2618,6 +2657,8 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
                 C.collection.splice(i, 1);
             }
         }, this);
+
+        this._isContainedInCollection = false;
     },
     getBoundingRect: function() {
         var w = this.width || 0;
@@ -2687,13 +2728,13 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
      * @name enchant.Sprite
      * @class
      * Eine Klasse die Grafiken darstellen kann.
-     * 
-     * @param {Number} [width] Die Breite des Sprites.
-     * @param {Number} [height] Die Höhe des Sprites.
+     * @param {Number} width Die Breite des Sprites.
+     * @param {Number} height Die Höhe des Sprites.
+     *
      * @example
-     *   var bear = new Sprite(32, 32);
-     *   bear.image = core.assets['chara1.gif'];
-     *   
+     * var bear = new Sprite(32, 32);
+     * bear.image = core.assets['chara1.gif'];
+     *
      * @constructs
      * @extends enchant.Entity
      */
@@ -2708,23 +2749,13 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
         this._frameTop = 0;
         this._frame = 0;
         this._frameSequence = [];
-        /**
-         */
-        this.addEventListener('enterframe', function() {
-            if (this._frameSequence.length !== 0) {
-                var nextFrame = this._frameSequence.shift();
-                if (nextFrame === null) {
-                    this._frameSequence = [];
-                } else {
-                    this._setFrame(nextFrame);
-                    this._frameSequence.push(nextFrame);
-                }
-            }
-        });
+
+        // frame に配列が指定されたときの処理.
+        this.addEventListener(enchant.Event.ENTER_FRAME, this._rotateFrameSequence);
     },
     /**
      * Die Grafik die im Sprite dargestellt wird.
-     * @type {enchant.Surface}
+     * @type enchant.Surface
      */
     image: {
         get: function() {
@@ -2738,7 +2769,7 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
                 return;
             }
             this._image = image;
-            this._setFrame(this._frame);
+            this._computeFramePosition();
         }
     },
     /**
@@ -2747,6 +2778,7 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
      * beginnend an der oberen linken Ecke, angeordnet. Wenn eine Nummbersequenz übergeben wird, wird
      * der dargestellte Frame automatisch gewechselt. Am ende des Arrays der Sequenz wird diese neugestartet.
      * Wenn ein Wert in der Sequenz auf null gesetzt wird, wird das automatische Framewechseln gestoppt.
+     *
      * @example
      * var sprite = new Sprite(32, 32);
      * sprite.frame = [0, 1, 0, 2]
@@ -2754,72 +2786,73 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
      * sprite.frame = [0, 1, 0, 2, null]
      * //-> 0, 1, 0, 2, (2, 2,.. :stop)
      *
-     * @type {Number|Array}
+     * @type Number|Array
      */
     frame: {
         get: function() {
             return this._frame;
         },
         set: function(frame) {
-            if(this._frame === frame) {
+            if (this._frame === frame) {
                 return;
             }
             if (frame instanceof Array) {
-                var frameSequence = frame;
-                var nextFrame = frameSequence.shift();
-                this._setFrame(nextFrame);
-                frameSequence.push(nextFrame);
-                this._frameSequence = frameSequence;
+                this._frameSequence = frame.slice();
+                this._rotateFrameSequence();
             } else {
-                this._setFrame(frame);
                 this._frameSequence = [];
                 this._frame = frame;
+                this._computeFramePosition();
             }
         }
     },
     /**
      * 0 <= frame
-     * @param frame
      * @private
      */
-    _setFrame: function(frame) {
+    _computeFramePosition: function() {
         var image = this._image;
-        var row, col;
+        var row;
         if (image != null) {
-            this._frame = frame;
             row = image.width / this._width | 0;
-            this._frameLeft = (frame % row | 0) * this._width;
-            this._frameTop = (frame / row | 0) * this._height % image.height;
+            this._frameLeft = (this._frame % row | 0) * this._width;
+            this._frameTop = (this._frame / row | 0) * this._height % image.height;
         }
     },
-    /**
-     * width of Sprite
-     * @type {Number}
-     */
+    _rotateFrameSequence: function() {
+        if (this._frameSequence.length !== 0) {
+            var nextFrame = this._frameSequence.shift();
+            if (nextFrame === null) {
+                this._frameSequence = [];
+            } else {
+                this._frame = nextFrame;
+                this._computeFramePosition();
+                this._frameSequence.push(nextFrame);
+            }
+        }
+    },
+    /**#nocode+*/
     width: {
         get: function() {
             return this._width;
         },
         set: function(width) {
             this._width = width;
-            this._setFrame(this._frame);
+            this._computeFramePosition();
             this._dirty = true;
         }
     },
-    /**
-     * height of Sprite
-     * @type {Number}
-     */
     height: {
         get: function() {
             return this._height;
         },
         set: function(height) {
             this._height = height;
-            this._setFrame(this._frame);
+            this._computeFramePosition();
             this._dirty = true;
         }
     },
+    /**#nocode-*/
     cvsRender: function(ctx) {
         var image = this._image,
             w = this._width, h = this._height,
@@ -2890,6 +2923,7 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
 
         this._debugColor = '#ff0000';
     },
+    /**#nocode+*/
     width: {
         get: function() {
             return this._width;
@@ -2901,9 +2935,10 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
             this.updateBoundArea();
         }
     },
+    /**#nocode-*/
     /**
      * Darzustellender Text.
-     * @type {String}
+     * @type String
      */
     text: {
         get: function() {
@@ -2930,7 +2965,7 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
     /**
      * Spezifiziert die horizontale Ausrichtung des Textes.
      * Kann im gleichen Format wie die CSS 'text-align' Eigenschaft angegeben werden.
-     * @type {String}
+     * @type String
      */
     textAlign: {
         get: function() {
@@ -2944,7 +2979,7 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
     /**
      * Text Eigenschaften.
      * Kann im gleichen Format wie die CSS 'font' Eigenschaft angegeben werden.
-     * @type {String}
+     * @type String
      */
     font: {
         get: function() {
@@ -2958,7 +2993,7 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
     /**
      * Text Farbe.
      * Kann im gleichen Format wie die CSS 'color' Eigenschaft angegeben werden.
-     * @type {String}
+     * @type String
      */
     color: {
         get: function() {
@@ -3070,7 +3105,6 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
      * @class
      * Eine Klasse mit der Karten aus Kacheln (Tiles)
      * erstellt und angezeigt werden können.
-     *
      * @param {Number} tileWidth Kachelbreite.
      * @param {Number} tileHeight Kachelhöhe.
      * @constructs
@@ -3112,7 +3146,7 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
         /**
          * Ein 2-Dimensionales Array um zu speichern, ob für eine Kachel
          * Kollesionsdetektion durchgeführt werden soll.
-         * @type {Array.<Array.<Number>>}
+         * @type Number[][]
          */
         this.collisionData = null;
 
@@ -3203,7 +3237,7 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
      * Setzt die Kartendaten, wobei die Daten (ein 2-Dimensionales Array bei dem die Indizes bei 0 beginnen) 
      * auf das Bild, beginned bei der linken oberen Ecke) projeziert werden.
      * Sollte mehr als ein Array übergeben worden sein, werden die Karten in invertierter Reihenfolge dargestellt. 
-     * @param {...Array<Array.<Number>>} data 2-Dimensionales Array mit Kachel Indizes. Mehrfachangaben möglich.
+     * @param {...Number[][]} data 2-Dimensionales Array mit Kachel Indizes. Mehrfachangaben möglich.
      */
     loadData: function(data) {
         this._data = Array.prototype.slice.apply(arguments);
@@ -3278,7 +3312,7 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
     },
     /**
      * Das Bild mit dem die Kacheln auf der Karte dargestellt werden.
-     * @type {enchant.Surface}
+     * @type enchant.Surface
      */
     image: {
         get: function() {
@@ -3307,7 +3341,7 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
     },
     /**
      * Kachelbreite
-     * @type {Number}
+     * @type Number
      */
     tileWidth: {
         get: function() {
@@ -3320,7 +3354,7 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
     },
     /**
      * Kachelhöhe.
-     * @type {Number}
+     * @type Number
      */
     tileHeight: {
         get: function() {
@@ -3431,23 +3465,23 @@ enchant.Group = enchant.Class.create(enchant.Node, {
      * Eine Klasse die mehrere {@link enchant.Node} beinhalten kann.
      *
      * @example
-     *   var stage = new Group();
-     *   stage.addChild(player);
-     *   stage.addChild(enemy);
-     *   stage.addChild(map);
-     *   stage.addEventListener('enterframe', function() {
-     *      // Bewegt den gesamten Frame je nach der aktuelle Spielerposition.
-     *      if (this.x > 64 - player.x) {
-     *          this.x = 64 - player.x;
-     *      }
-     *   });
+     * var stage = new Group();
+     * stage.addChild(player);
+     * stage.addChild(enemy);
+     * stage.addChild(map);
+     * stage.addEventListener('enterframe', function() {
+     *     // Bewegt den gesamten Frame je nach der aktuelle Spielerposition.
+     *     if (this.x > 64 - player.x) {
+     *         this.x = 64 - player.x;
+     *     }
+     * });
      * @constructs
      * @extends enchant.Node
      */
     initialize: function() {
         /**
          * Kind-Nodes.
-         * @type {Array.<enchant.Node>}
+         * @type enchant.Node[]
          */
         this.childNodes = [];
 
@@ -3542,7 +3576,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
     },
     /**
      * Der Node, welcher das erste Kind der Gruppe darstellt.
-     * @type {enchant.Node}
+     * @type enchant.Node
      */
     firstChild: {
         get: function() {
@@ -3551,7 +3585,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
     },
     /**
      * Der Node, welcher das letzte Kind der Gruppe darstellt.
-     * @type {enchant.Node}
+     * @type enchant.Node
      */
     lastChild: {
         get: function() {
@@ -3560,7 +3594,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
     },
     /**
     * Rotationswinkel der Gruppe (Grad).
-    * @type {Number}
+    * @type Number
     */
     rotation: {
         get: function() {
@@ -3573,9 +3607,9 @@ enchant.Group = enchant.Class.create(enchant.Node, {
     },
     /**
     * Skalierungsfaktor auf der x-Achse der Gruppe.
-    * @type {Number}
-    * @see enchant.CanvasGroup.originX
-    * @see enchant.CanvasGroup.originY
+    * @type Number
+    * @see enchant.Group#originX
+    * @see enchant.Group#originY
     */
     scaleX: {
         get: function() {
@@ -3588,9 +3622,9 @@ enchant.Group = enchant.Class.create(enchant.Node, {
     },
     /**
     * Skalierungsfaktor auf der y-Achse der Gruppe.
-    * @type {Number}
-    * @see enchant.CanvasGroup.originX
-    * @see enchant.CanvasGroup.originY
+    * @type Number
+    * @see enchant.Group#originX
+    * @see enchant.Group#originY
     */
     scaleY: {
         get: function() {
@@ -3603,7 +3637,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
     },
     /**
     * Ausgangspunkt für Rotation und Skalierung.
-    * @type {Number}
+    * @type Number
     */
     originX: {
         get: function() {
@@ -3616,7 +3650,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
     },
     /**
     * Ausgangspunkt für Rotation und Skalierung.
-    * @type {Number}
+    * @type Number
     */
     originY: {
         get: function() {
@@ -3627,6 +3661,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
             this._dirty = true;
         }
     },
+    /**#nocode+*/
     _dirty: {
         get: function() {
             return this.__dirty;
@@ -3641,6 +3676,7 @@ enchant.Group = enchant.Class.create(enchant.Node, {
             }
         }
     }
+    /**#nocode-*/
 });
 
 enchant.Matrix = enchant.Class.create({
@@ -4208,6 +4244,7 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
      * Eine Klasse die HTML Canvas für das Rendern nutzt.
      * Das Rendern der Kinder wird durch das Canvas Rendering ersetzt.
      * @constructs
+     * @extends enchant.Group
      */
     initialize: function() {
         var core = enchant.Core.instance;
@@ -4287,6 +4324,10 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
         this.addEventListener('childadded', __onchildadded);
 
     },
+    /**
+     * Die Breite der CanvasLayer.
+     * @type Number
+     */
     width: {
         get: function() {
             return this._width;
@@ -4296,6 +4337,10 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
             this._element.width = this._detect.width = width;
         }
     },
+    /**
+     * Die Höhe der CanvasLayer.
+     * @type Number
+     */
     height: {
         get: function() {
             return this._height;
@@ -4509,7 +4554,6 @@ enchant.CanvasRenderer.instance = new enchant.CanvasRenderer();
 
 /**
  * @scope enchant.Scene.prototype
- * @type {*}
  */
 enchant.Scene = enchant.Class.create(enchant.Group, {
     /**
@@ -4518,10 +4562,10 @@ enchant.Scene = enchant.Class.create(enchant.Group, {
      * Eine Klasse die zur Wurzel im Darstellungsobjektbaum wird.
      *
      * @example
-     *   var scene = new Scene();
-     *   scene.addChild(player);
-     *   scene.addChild(enemy);
-     *   core.pushScene(scene);
+     * var scene = new Scene();
+     * scene.addChild(player);
+     * scene.addChild(enemy);
+     * core.pushScene(scene);
      *
      * @constructs
      * @extends enchant.Group
@@ -4564,6 +4608,7 @@ enchant.Scene = enchant.Class.create(enchant.Group, {
 
         this._oncoreresize(core);
     },
+    /**#nocode+*/
     x: {
         get: function() {
             return this._x;
@@ -4649,6 +4694,7 @@ enchant.Scene = enchant.Class.create(enchant.Group, {
             this._backgroundColor = this._element.style.backgroundColor = color;
         }
     },
+    /**#nocode-*/
     _oncoreresize: function(e) {
         this._element.style.width = e.width + 'px';
         this.width = e.width;
@@ -4741,27 +4787,25 @@ enchant.Scene = enchant.Class.create(enchant.Group, {
  */
 enchant.LoadingScene = enchant.Class.create(enchant.Scene, {
     /**
-     * @name enchant.LoadingScene.
+     * @name enchant.LoadingScene
      * @class
+     *
+     * @example
+     * enchant.LoadingScene = enchant.Class.create(enchant.Scene, {
+     *     initialize: function() {
+     *         enchant.Scene.call(this);
+     *         this.backgroundColor = 'red';
+     *         // ...
+     *         this.addEventListener('progress', function(e) {
+     *             progress = e.loaded / e.total;
+     *         });
+     *         this.addEventListener('enterframe', function() {
+     *             // animation
+     *         });
+     *     }
+     * });
      * @constructs
      * @extends enchant.Scene
-     * Default loading scene. If you want to use your own loading animation, overwrite (don't inherit) this class.
-     * Referred from enchant.Core in default, as `new enchant.LoadingScene` etc.
-     *
-     * @usage
-     * enchant.LoadingScene = enchant.Class.create(enchant.Scene, {
-     *    initialize: function(){
-     *        enchant.Scene.call(this);
-     *        this.backgroundColor = 'red';
-     *        // ...
-     *        this.addEventListener('progress', function(e){
-     *            progress = e.loaded / e.total;
-     *        });
-     *        this.addEventListener('enterframe', function(){
-     *            // animation
-     *        });
-     *    }
-     * });
      */
     initialize: function() {
         enchant.Scene.call(this);
@@ -4801,9 +4845,14 @@ enchant.LoadingScene = enchant.Class.create(enchant.Scene, {
 
 /**
  * @scope enchant.CanvasScene.prototype
- * @type {*}
  */
 enchant.CanvasScene = enchant.Class.create(enchant.Scene, {
+    /**
+     * @name enchant.CanvasScene
+     * @class
+     * @constructs
+     * @extends enchant.Scene
+     */
     initialize: function() {
         enchant.Scene.call(this);
         this.addLayer('Canvas');
@@ -4832,10 +4881,15 @@ enchant.CanvasScene = enchant.Class.create(enchant.Scene, {
 });
 
 /**
- * @scope enchant.CanvasScene.prototype
- * @type {*}
+ * @scope enchant.DOMScene.prototype
  */
 enchant.DOMScene = enchant.Class.create(enchant.Scene, {
+    /**
+     * @name enchant.DOMScene
+     * @class
+     * @constructs
+     * @extends enchant.Scene
+     */
     initialize: function() {
         enchant.Scene.call(this);
         this.addLayer('Dom');
@@ -4878,17 +4932,18 @@ enchant.Surface = enchant.Class.create(enchant.EventTarget, {
      * {@link enchant.Surface#context} Variable erfolgen.
      *
      * @example
-     *   // Erstellt einen Sprite und stellt einen Kreis dar.
-     *   var ball = new Sprite(50, 50);
-     *   var surface = new Surface(50, 50);
-     *   surface.context.beginPath();
-     *   surface.context.arc(25, 25, 25, 0, Math.PI*2, true);
-     *   surface.context.fill();
-     *   ball.image = surface;
+     * // Erstellt einen Sprite und stellt einen Kreis dar.
+     * var ball = new Sprite(50, 50);
+     * var surface = new Surface(50, 50);
+     * surface.context.beginPath();
+     * surface.context.arc(25, 25, 25, 0, Math.PI*2, true);
+     * surface.context.fill();
+     * ball.image = surface;
      *
      * @param {Number} width Die Breite der Surface.
      * @param {Number} height Die Höhe der Surface.
      * @constructs
+     * @extends enchant.EventTarget
      */
     initialize: function(width, height) {
         enchant.EventTarget.call(this);
@@ -4897,17 +4952,17 @@ enchant.Surface = enchant.Class.create(enchant.EventTarget, {
 
         /**
          * Die Breite der Surface.
-         * @type {Number}
+         * @type Number
          */
         this.width = width;
         /**
          * Die Höhe der Surface.
-         * @type {Number}
+         * @type Number
          */
         this.height = height;
         /**
          * Der Surface Zeichenkontext.
-         * @type {CanvasRenderingContext2D}
+         * @type CanvasRenderingContext2D
          */
         this.context = null;
 
@@ -4944,7 +4999,7 @@ enchant.Surface = enchant.Class.create(enchant.EventTarget, {
      * Liefert einen Pixel der Surface.
      * @param {Number} x Die x Koordinaten des Pixel.
      * @param {Number} y Die y Koordinaten des Pixel.
-     * @return {Array.<Number>} Ein Array das die Pixelinformationen im [r, g, b, a] Format enthält.
+     * @return {Number[]} Ein Array das die Pixelinformationen im [r, g, b, a] Format enthält.
      */
     getPixel: function(x, y) {
         return this.context.getImageData(x, y, 1, 1).data;
@@ -4979,15 +5034,15 @@ enchant.Surface = enchant.Class.create(enchant.EventTarget, {
      * übergeben werden, werden diese auf die Canvas drawImage Methode angewendet.
      *
      * @example
-     *   var src = core.assets['src.gif'];
-     *   var dst = new Surface(100, 100);
-     *   dst.draw(src);         // Zeichnet src bei (0, 0)
-     *   dst.draw(src, 50, 50); // Zeichnet src bei (50, 50)
-     *   // Zeichnet src an der Position (50,50), jedoch nur 30x30 Pixel
-     *   dst.draw(src, 50, 50, 30, 30);
-     *   // Skaliert und zeichnet den Bereich mit der (Breite, Höhe) von (40, 40)
-     *   // in src ab (10,10) in diese Surface bei (50,50) mit einer (Breite, Höhe) von (30, 30).
-     *   dst.draw(src, 10, 10, 40, 40, 50, 50, 30, 30);
+     * var src = core.assets['src.gif'];
+     * var dst = new Surface(100, 100);
+     * dst.draw(src);         // Zeichnet src bei (0, 0)
+     * dst.draw(src, 50, 50); // Zeichnet src bei (50, 50)
+     * // Zeichnet src an der Position (50,50), jedoch nur 30x30 Pixel
+     * dst.draw(src, 50, 50, 30, 30);
+     * // Skaliert und zeichnet den Bereich mit der (Breite, Höhe) von (40, 40)
+     * // in src ab (10,10) in diese Surface bei (50,50) mit einer (Breite, Höhe) von (30, 30).
+     * dst.draw(src, 10, 10, 40, 40, 50, 50, 30, 30);
      *
      * @param {enchant.Surface} image Surface used in drawing.
      */
@@ -5080,16 +5135,57 @@ enchant.Surface._getPattern = function(surface, force) {
 if (window.Deferred) {
     enchant.Deferred = window.Deferred;
 } else {
+    /**
+     * @scope enchant.Deferred.prototype
+     */
     enchant.Deferred = enchant.Class.create({
+        /**
+         * @name enchant.Deferred
+         * @class
+         * <br/>
+         * See: <a href="http://cho45.stfuawsc.com/jsdeferred/">
+         * http://cho45.stfuawsc.com/jsdeferred/</a>
+         *
+         * @example
+         * enchant.Deferred
+         *     .next(function() {
+         *         return 42;
+         *     })
+         *     .next(function(n) {
+         *         console.log(n); // 42
+         *     })
+         *     .next(function() {
+         *         return core.load('img.png'); // wait loading
+         *     })
+         *     .next(function() {
+         *         var img = core.assets['img.png'];
+         *         console.log(img instanceof enchant.Surface); // true
+         *         throw new Error('!!!');
+         *     })
+         *     .next(function() {
+         *         // skip
+         *     })
+         *     .error(function(err) {
+         *          console.log(err.message); // !!!
+         *     });
+         *
+         * @constructs
+         */
         initialize: function() {
             this._succ = this._fail = this._next = this._id = null;
             this._tail = this;
         },
+        /**
+         * @param {Function} func
+         */
         next: function(func) {
             var q = new enchant.Deferred();
             q._succ = func;
             return this._add(q);
         },
+        /**
+         * @param {Function} func
+         */
         error: function(func) {
             var q = new enchant.Deferred();
             q._fail = func;
@@ -5100,6 +5196,9 @@ if (window.Deferred) {
             this._tail = queue;
             return this;
         },
+        /**
+         * @param {*} arg
+         */
         call: function(arg) {
             var received;
             var queue = this;
@@ -5120,6 +5219,9 @@ if (window.Deferred) {
                 queue._next.call(received);
             }
         },
+        /**
+         * @param {*} arg
+         */
         fail: function(arg) {
             var result, err,
                 queue = this;
@@ -5140,15 +5242,55 @@ if (window.Deferred) {
     });
     enchant.Deferred._insert = function(queue, ins) {
         if (queue._next instanceof enchant.Deferred) {
-            ins._next = queue._next;
+            ins._tail._next = queue._next;
         }
         queue._next = ins;
     };
+    /**
+     * @param {Function} func
+     * @return {enchant.Deferred}
+     * @static
+     */
     enchant.Deferred.next = function(func) {
         var q = new enchant.Deferred().next(func);
         q._id = setTimeout(function() { q.call(); }, 0);
         return q;
     };
+    /**
+     * @param {Object|enchant.Deferred[]} arg
+     * @return {enchant.Deferred}
+     *
+     * @example
+     * // array
+     * enchant.Deferred
+     *     .parallel([
+     *         enchant.Deferred.next(function() {
+     *             return 24;
+     *         }),
+     *         enchant.Deferred.next(function() {
+     *             return 42;
+     *         })
+     *     ])
+     *     .next(function(arg) {
+     *         console.log(arg); // [ 24, 42 ]
+     *     });
+     * // object
+     * enchant.Deferred
+     *     .parallel({
+     *         foo: enchant.Deferred.next(function() {
+     *             return 24;
+     *         }),
+     *         bar: enchant.Deferred.next(function() {
+     *             return 42;
+     *         })
+     *     })
+     *     .next(function(arg) {
+     *         console.log(arg.foo); // 24
+     *         console.log(arg.bar); // 42
+     *     });
+     *
+     * @static
+     */
     enchant.Deferred.parallel = function(arg) {
         var q = new enchant.Deferred();
         q._id = setTimeout(function() { q.call(); }, 0);
@@ -5184,7 +5326,6 @@ if (window.Deferred) {
 
 /**
  * @scope enchant.DOMSound.prototype
- * @type {*}
  */
 enchant.DOMSound = enchant.Class.create(enchant.EventTarget, {
     /**
@@ -5200,12 +5341,13 @@ enchant.DOMSound = enchant.Class.create(enchant.EventTarget, {
      * Instanzen dieser Klasse werden nicht mit Hilfe des Konstruktors, sondern mit
      * {@link enchant.DOMSound.load} erstellt.
      * @constructs
+     * @extends enchant.EventTarget
      */
     initialize: function() {
         enchant.EventTarget.call(this);
         /**
          * Die länge der Sounddatei in Sekunden.
-         * @type {Number}
+         * @type Number
          */
         this.duration = 0;
         throw new Error("Illegal Constructor");
@@ -5254,7 +5396,7 @@ enchant.DOMSound = enchant.Class.create(enchant.EventTarget, {
     },
     /**
      * Aktuelle Wiedergabeposition (seconds).
-     * @type {Number}
+     * @type Number
      */
     currentTime: {
         get: function() {
@@ -5268,7 +5410,7 @@ enchant.DOMSound = enchant.Class.create(enchant.EventTarget, {
     },
     /**
      * Lautstärke. 0 (stumm) ～ 1 (volle Lautstärke).
-     * @type {Number}
+     * @type Number
      */
     volume: {
         get: function() {
@@ -5283,10 +5425,11 @@ enchant.DOMSound = enchant.Class.create(enchant.EventTarget, {
 });
 
 /**
- * Läd eine Audio Datei und erstellt ein Sound objekt.
- *
+ * Läd eine Audio Datei und erstellt ein DOMSound objekt.
  * @param {String} src Pfad zu der zu ladenden Audiodatei.
  * @param {String} [type] MIME Type der Audtiodatei.
+ * @param {Function} [callback]
+ * @param {Function} [onerror]
  * @return {enchant.DOMSound} DOMSound
  * @static
  */
@@ -5300,6 +5443,7 @@ enchant.DOMSound.load = function(src, type, callback, onerror) {
         }
     }
     type = type.replace('mp3', 'mpeg').replace('m4a', 'mp4');
+    callback = callback || function() {};
     onerror = onerror || function() {};
 
     var sound = Object.create(enchant.DOMSound.prototype);
@@ -5314,9 +5458,10 @@ enchant.DOMSound.load = function(src, type, callback, onerror) {
         }, 0);
     } else {
         if (!enchant.ENV.USE_FLASH_SOUND && audio.canPlayType(type)) {
-            audio.addEventListener('canplaythrough', function() {
+            audio.addEventListener('canplaythrough', function canplay() {
                 sound.duration = audio.duration;
                 sound.dispatchEvent(new enchant.Event('load'));
+                audio.removeEventListener('canplaythrough', canplay);
             }, false);
             audio.src = src;
             audio.load();
@@ -5370,23 +5515,20 @@ enchant.DOMSound.load = function(src, type, callback, onerror) {
     return sound;
 };
 
-
 window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext || window.oAudioContext;
 
 /**
  * @scope enchant.WebAudioSound.prototype
- * @type {*}
  */
 enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
     /**
      * @name enchant.WebAudioSound
      * @class
-     * Sound wrapper class for Web Audio API (supported on some webkit-based browsers)
-     *
      * @constructs
+     * @extends enchant.EventTarget
      */
     initialize: function() {
-        if(!window.webkitAudioContext){
+        if (!window.AudioContext) {
             throw new Error("This browser does not support WebAudio API.");
         }
         enchant.EventTarget.call(this);
@@ -5398,6 +5540,10 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         this._state = 0;
         this.connectTarget = enchant.WebAudioSound.destination;
     },
+    /**
+     * Startet die Wiedergabe.
+     * @param {Boolean} [dup=false] Wenn true, Objekt spielt neuen Sound während im letzten Ton hält.
+     */
     play: function(dup) {
         if (this._state === 1 && !dup) {
             this.src.disconnect(this.connectTarget);
@@ -5408,31 +5554,64 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         var offset = this._currentTime;
         var actx = this.context;
         this.src = actx.createBufferSource();
+        if (actx.createGain != null) {
+            this._gain = actx.createGain();
+        } else {
+            this._gain = actx.createGainNode();
+        }
         this.src.buffer = this.buffer;
-        this.src.gain.value = this._volume;
-        this.src.connect(this.connectTarget);
-        this.src.noteGrainOn(0, offset, this.buffer.duration - offset - 1.192e-7);
+        this._gain.gain.value = this._volume;
+
+        this.src.connect(this._gain);
+        this._gain.connect(this.connectTarget);
+        if (this.src.start != null) {
+            this.src.start(0, offset, this.buffer.duration - offset - 1.192e-7);
+        } else {
+            this.src.noteGrainOn(0, offset, this.buffer.duration - offset - 1.192e-7);
+        }
         this._startTime = actx.currentTime - this._currentTime;
         this._state = 1;
     },
+    /**
+     * Pausiert die Wiedergabe.
+     */
     pause: function() {
         var currentTime = this.currentTime;
         if (currentTime === this.duration) {
             return;
         }
-        this.src.noteOff(0);
+        if (this.src.stop != null) {
+            this.src.stop(0);
+        } else {
+            this.src.noteOff(0);
+        }
         this._currentTime = currentTime;
         this._state = 2;
     },
+    /**
+     * Stoppt die Wiedergabe.
+     */
     stop: function() {
-        this.src.noteOff(0);
+        if (this.src.stop != null) {
+            this.src.stop(0);
+        } else {
+            this.src.noteOff(0);
+        }
         this._state = 0;
     },
+    /**
+     * Erstellt eine Kopie dieses Soundobjektes.
+     * @return {enchant.WebAudioSound} Kopiertes Sound Objekt.
+     */
     clone: function() {
         var sound = new enchant.WebAudioSound();
         sound.buffer = this.buffer;
         return sound;
     },
+    /**
+     * Die länge der Sounddatei in Sekunden.
+     * @type Number
+     */
     duration: {
         get: function() {
             if (this.buffer) {
@@ -5442,6 +5621,10 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
             }
         }
     },
+    /**
+     * Aktuelle Wiedergabeposition (seconds).
+     * @type Number
+     */
     volume: {
         get: function() {
             return this._volume;
@@ -5450,10 +5633,14 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
             volume = Math.max(0, Math.min(1, volume));
             this._volume = volume;
             if (this.src) {
-                this.src.gain.value = volume;
+                this._gain.gain.value = volume;
             }
         }
     },
+    /**
+     * Lautstärke. 0 (stumm) ～ 1 (volle Lautstärke).
+     * @type Number
+     */
     currentTime: {
         get: function() {
             return Math.max(0, Math.min(this.duration, this.src.context.currentTime - this._startTime));
@@ -5467,9 +5654,19 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
     }
 });
 
+/**
+ * Läd eine Audio Datei und erstellt ein WebAudioSound objekt.
+ * @param {String} src Pfad zu der zu ladenden Audiodatei.
+ * @param {String} [type] MIME Type der Audtiodatei.
+ * @param {Function} [callback]
+ * @param {Function} [onerror]
+ * @return {enchant.WebAudioSound} WebAudioSound
+ * @static
+ */
 enchant.WebAudioSound.load = function(src, type, callback, onerror) {
     var canPlay = (new Audio()).canPlayType(type);
     var sound = new enchant.WebAudioSound();
+    callback = callback || function() {};
     onerror = onerror || function() {};
     sound.addEventListener(enchant.Event.LOAD, callback);
     sound.addEventListener(enchant.Event.ERROR, onerror);
@@ -5499,16 +5696,14 @@ enchant.WebAudioSound.load = function(src, type, callback, onerror) {
     return sound;
 };
 
-if(window.AudioContext){
+if (window.AudioContext) {
     enchant.WebAudioSound.audioContext = new window.AudioContext();
     enchant.WebAudioSound.destination = enchant.WebAudioSound.audioContext.destination;
 }
 
-/* jshint newcap: false */
-
 enchant.Sound = window.AudioContext && enchant.ENV.USE_WEBAUDIO ? enchant.WebAudioSound : enchant.DOMSound;
 
-/**
+/*
  * ============================================================================================
  * Easing Equations v2.0
  * September 1, 2003
@@ -5518,10 +5713,13 @@ enchant.Sound = window.AudioContext && enchant.ENV.USE_WEBAUDIO ? enchant.WebAud
  */
 
 /**
- * Easing function library, from "Easing Equations" by Robert Penner.
- * @type {Object}
  * @namespace
- * {@link enchant.Tween} クラスで用いるイージング関数のライブラリ名前空間.
+ * <br/>
+ * See: <a href="http://www.robertpenner.com/easing/">
+ * http://www.robertpenner.com/easing/</a>
+ * <br/>
+ * See: <a href="http://www.robertpenner.com/easing/penner_chapter7_tweening.pdf">
+ * http://www.robertpenner.com/easing/penner_chapter7_tweening.pdf</a>
  */
 enchant.Easing = {
     /**
@@ -5959,12 +6157,7 @@ enchant.Easing = {
 };
 
 /**
- * Easing Equations v2.0
- */
-
-/**
  * @scope enchant.ActionEventTarget.prototype
- * @type {*}
  */
 enchant.ActionEventTarget = enchant.Class.create(enchant.EventTarget, {
     /**
@@ -5976,10 +6169,6 @@ enchant.ActionEventTarget = enchant.Class.create(enchant.EventTarget, {
     initialize: function() {
         enchant.EventTarget.apply(this, arguments);
     },
-    /**
-     * Issue event.
-     * @param {enchant.Event} e Event issued.
-     */
     dispatchEvent: function(e) {
         var target;
         if (this.node) {
@@ -6011,7 +6200,9 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
     /**
      * @name enchant.Timeline
      * @class
+     * @param {enchant.Node} node
      * @constructs
+     * @extends enchant.EventTarget
      */
     initialize: function(node) {
         enchant.EventTarget.call(this);
@@ -6056,9 +6247,12 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      */
     next: function(remainingTime) {
         var e, action = this.queue.shift();
-        e = new enchant.Event("actionend");
-        e.timeline = this;
-        action.dispatchEvent(e);
+
+        if (action) {
+            e = new enchant.Event("actionend");
+            e.timeline = this;
+            action.dispatchEvent(e);
+        }
 
         if (this.queue.length === 0) {
             this._activated = false;
@@ -6086,6 +6280,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
+     * @param {enchant.Event} enterFrameEvent
      */
     tick: function(enterFrameEvent) {
         if (this.paused) {
@@ -6110,6 +6305,10 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
             action.dispatchEvent(e);
         }
     },
+    /**
+     * @param {enchant.Action} action
+     * @return {enchant.Timeline}
+     */
     add: function(action) {
         if (!this._activated) {
             var tl = this;
@@ -6139,16 +6338,21 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @param {Object} params
+     * @return {enchant.Timeline}
      */
     action: function(params) {
         return this.add(new enchant.Action(params));
     },
     /**
+     * @param {Object} params
+     * @return {enchant.Timeline}
      */
     tween: function(params) {
         return this.add(new enchant.Tween(params));
     },
     /**
+     * @return {enchant.Timeline}
      */
     clear: function() {
         var e = new enchant.Event("removedfromtimeline");
@@ -6162,6 +6366,8 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @param {Number} frames
+     * @return {enchant.Timeline}
      */
     skip: function(frames) {
         var event = new enchant.Event("enterframe");
@@ -6177,6 +6383,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @return {enchant.Timeline}
      */
     pause: function() {
         if (!this.paused) {
@@ -6186,6 +6393,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @return {enchant.Timeline}
      */
     resume: function() {
         if (this.paused) {
@@ -6195,18 +6403,22 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @return {enchant.Timeline}
      */
     loop: function() {
         this.looped = true;
         return this;
     },
     /**
+     * @return {enchant.Timeline}
      */
     unloop: function() {
         this.looped = false;
         return this;
     },
     /**
+     * @param {Number} time
+     * @return {enchant.Timeline}
      */
     delay: function(time) {
         this.add(new enchant.Action({
@@ -6215,12 +6427,16 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @ignore
+     * @param {Number} time
      */
     wait: function(time) {
         // reserved
         return this;
     },
     /**
+     * @param {Function} func
+     * @return {enchant.Timeline}
      */
     then: function(func) {
         var timeline = this;
@@ -6234,11 +6450,15 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @param {Function} func
+     * @return {enchant.Timeline}
      */
     exec: function(func) {
         this.then(func);
     },
     /**
+     * @param {Object} cue
+     * @return {enchant.Timeline}
      */
     cue: function(cue) {
         var ptr = 0;
@@ -6251,6 +6471,9 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
+     * @param {Function} func
+     * @param {Number} time
+     * @return {enchant.Timeline}
      */
     repeat: function(func, time) {
         this.add(new enchant.Action({
@@ -6262,6 +6485,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @return {enchant.Timeline}
      */
     and: function() {
         var last = this.queue.pop();
@@ -6295,6 +6519,8 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @param {Function} func
+     * @return {enchant.Timeline}
      */
     waitUntil: function(func) {
         var timeline = this;
@@ -6309,6 +6535,10 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @param {Number} opacity
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     fadeTo: function(opacity, time, easing) {
         this.tween({
@@ -6319,16 +6549,27 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         return this;
     },
     /**
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     fadeIn: function(time, easing) {
         return this.fadeTo(1, time, easing);
     },
     /**
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     fadeOut: function(time, easing) {
         return this.fadeTo(0, time, easing);
     },
     /**
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     moveTo: function(x, y, time, easing) {
         return this.tween({
@@ -6339,6 +6580,10 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @param {Number} x
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     moveX: function(x, time, easing) {
         return this.tween({
@@ -6348,6 +6593,10 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @param {Number} y
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     moveY: function(y, time, easing) {
         return this.tween({
@@ -6357,6 +6606,11 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     moveBy: function(x, y, time, easing) {
         return this.tween({
@@ -6371,6 +6625,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @return {enchant.Timeline}
      */
     hide: function() {
         return this.then(function() {
@@ -6378,6 +6633,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @return {enchant.Timeline}
      */
     show: function() {
         return this.then(function() {
@@ -6385,6 +6641,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @return {enchant.Timeline}
      */
     removeFromScene: function() {
         return this.then(function() {
@@ -6392,6 +6649,11 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @param {Number} scaleX
+     * @param {Number} [scaleY]
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     scaleTo: function(scale, time, easing) {
         if (typeof easing === "number") {
@@ -6410,6 +6672,11 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @param {Number} scaleX
+     * @param {Number} [scaleY]
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     scaleBy: function(scale, time, easing) {
         if (typeof easing === "number") {
@@ -6436,6 +6703,10 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @param {Number} deg
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     rotateTo: function(deg, time, easing) {
         return this.tween({
@@ -6445,6 +6716,10 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         });
     },
     /**
+     * @param {Number} deg
+     * @param {Number} time
+     * @param {Function} [easing=enchant.Easing.LINEAR]
+     * @return {enchant.Timeline}
      */
     rotateBy: function(deg, time, easing) {
         return this.tween({
@@ -6459,14 +6734,18 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
 
 /**
  * @scope enchant.Action.prototype
- * @type {*}
  */
-
 enchant.Action = enchant.Class.create(enchant.ActionEventTarget, {
     /**
      * @name enchant.Action
      * @class
+     * @param {Object} param
+     * @param {Number} [param.time]
+     * @param {Function} [param.onactionstart]
+     * @param {Function} [param.onactiontick]
+     * @param {Function} [param.onactionend]
      * @constructs
+     * @extends enchant.ActionEventTarget
      */
     initialize: function(param) {
         enchant.ActionEventTarget.call(this);
@@ -6524,9 +6803,11 @@ enchant.ParallelAction = enchant.Class.create(enchant.Action, {
         var timeline = this.timeline;
         var node = this.node;
         /**
+         * @type enchant.Action[]
          */
         this.actions = [];
         /**
+         * @type enchant.Action[]
          */
         this.endedActions = [];
         var that = this;
@@ -6588,6 +6869,11 @@ enchant.Tween = enchant.Class.create(enchant.Action, {
     /**
      * @name enchant.Tween
      * @class
+     * @param {Object} params
+     * @param {Number} params.time
+     * @param {Function} [params.easing=enchant.Easing.LINEAR]
+     * @constructs
+     * @extends enchant.Action
      */
     initialize: function(params) {
         var origin = {};
@@ -6642,7 +6928,4 @@ enchant.Tween = enchant.Class.create(enchant.Action, {
     }
 });
 
-/**
- *
- */
 }(window));

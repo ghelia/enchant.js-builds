@@ -50,17 +50,27 @@
 				
 					<li><a href="../symbols/enchant.AvatarBG.html">enchant<span class='break'> </span>.<span class='break'> </span>AvatarBG</a></li>
 				
+					<li><a href="../symbols/enchant.BinaryInputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>BinaryInputManager</a></li>
+				
+					<li><a href="../symbols/enchant.BinaryInputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>BinaryInputSource</a></li>
+				
 					<li><a href="../symbols/enchant.box2d.PhysicsWorld.html">enchant<span class='break'> </span>.<span class='break'> </span>box2d<span class='break'> </span>.<span class='break'> </span>PhysicsWorld</a></li>
 				
 					<li><a href="../symbols/enchant.box2d.PhySprite.html">enchant<span class='break'> </span>.<span class='break'> </span>box2d<span class='break'> </span>.<span class='break'> </span>PhySprite</a></li>
 				
 					<li><a href="../symbols/enchant.CanvasLayer.html">enchant<span class='break'> </span>.<span class='break'> </span>CanvasLayer</a></li>
 				
+					<li><a href="../symbols/enchant.CanvasScene.html">enchant<span class='break'> </span>.<span class='break'> </span>CanvasScene</a></li>
+				
 					<li><a href="../symbols/enchant.Class.html">enchant<span class='break'> </span>.<span class='break'> </span>Class</a></li>
 				
 					<li><a href="../symbols/enchant.Class.MixingRecipe.html">enchant<span class='break'> </span>.<span class='break'> </span>Class<span class='break'> </span>.<span class='break'> </span>MixingRecipe</a></li>
 				
 					<li><a href="../symbols/enchant.Core.html">enchant<span class='break'> </span>.<span class='break'> </span>Core</a></li>
+				
+					<li><a href="../symbols/enchant.Deferred.html">enchant<span class='break'> </span>.<span class='break'> </span>Deferred</a></li>
+				
+					<li><a href="../symbols/enchant.DOMScene.html">enchant<span class='break'> </span>.<span class='break'> </span>DOMScene</a></li>
 				
 					<li><a href="../symbols/enchant.DOMSound.html">enchant<span class='break'> </span>.<span class='break'> </span>DOMSound</a></li>
 				
@@ -73,6 +83,8 @@
 					<li><a href="../symbols/enchant.Event.html">enchant<span class='break'> </span>.<span class='break'> </span>Event</a></li>
 				
 					<li><a href="../symbols/enchant.EventTarget.html">enchant<span class='break'> </span>.<span class='break'> </span>EventTarget</a></li>
+				
+					<li><a href="../symbols/enchant.Game.html">enchant<span class='break'> </span>.<span class='break'> </span>Game</a></li>
 				
 					<li><a href="../symbols/enchant.gl.AmbientLight.html">enchant<span class='break'> </span>.<span class='break'> </span>gl<span class='break'> </span>.<span class='break'> </span>AmbientLight</a></li>
 				
@@ -174,9 +186,17 @@
 				
 					<li><a href="../symbols/enchant.Group.html">enchant<span class='break'> </span>.<span class='break'> </span>Group</a></li>
 				
+					<li><a href="../symbols/enchant.InputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>InputManager</a></li>
+				
+					<li><a href="../symbols/enchant.InputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>InputSource</a></li>
+				
+					<li><a href="../symbols/enchant.KeyboardInputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>KeyboardInputManager</a></li>
+				
+					<li><a href="../symbols/enchant.KeyboardInputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>KeyboardInputSource</a></li>
+				
 					<li><a href="../symbols/enchant.Label.html">enchant<span class='break'> </span>.<span class='break'> </span>Label</a></li>
 				
-					<li><a href="../symbols/enchant.LoadingScene..html">enchant<span class='break'> </span>.<span class='break'> </span>LoadingScene<span class='break'> </span>.<span class='break'> </span></a></li>
+					<li><a href="../symbols/enchant.LoadingScene.html">enchant<span class='break'> </span>.<span class='break'> </span>LoadingScene</a></li>
 				
 					<li><a href="../symbols/enchant.Map.html">enchant<span class='break'> </span>.<span class='break'> </span>Map</a></li>
 				
@@ -297,7 +317,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2013-4-1 1:14
+		Generated on: 2014-2-28 18:40
 	</div>
 </div>
 
@@ -475,7 +495,7 @@ new class will inherit the class definition.</dd>
 							
 								<dt>
 									<span class="light fixedFont">{*}</span>  <b>definition</b>
-									
+									<i>Optional</i>
 								</dt>
 								<dd>Class definition.</dd>
 							
@@ -612,18 +632,18 @@ to explicitly call the previous constructor to ensure a correct class initializa
 								
 								
 									
-										<pre class="code">  var Ball = Class.create({ // Creates independent class.
-      initialize: function(radius) { ... }, // Method definition.
-      fall: function() { ... }
-  });
+										<pre class="code">var Ball = Class.create({ // Creates independent class.
+    initialize: function(radius) { ... }, // Method definition.
+    fall: function() { ... }
+});
 
-  var Ball = Class.create(Sprite);  // Creates a class inheriting from "Sprite"
-  var Ball = Class.create(Sprite, { // Creates a class inheriting "Sprite"
-      initialize: function(radius) { // Overwrites constructor
-         Sprite.call(this, radius*2, radius*2); // Applies previous constructor.
-         this.image = core.assets['ball.gif'];
-      }
-  });</pre>
+var Ball = Class.create(Sprite);  // Creates a class inheriting from "Sprite"
+var Ball = Class.create(Sprite, { // Creates a class inheriting "Sprite"
+    initialize: function(radius) { // Overwrites constructor
+        Sprite.call(this, radius * 2, radius * 2); // Applies previous constructor.
+        this.image = core.assets['ball.gif'];
+    }
+});</pre>
 									
 								
 								
@@ -659,7 +679,7 @@ new class will inherit the class definition.</dd>
 									&lt;static&gt; 
 									</span>
 									
-									<span class="light">{...ConstructorFunction}</span>
+									<span class="light">{Function[]}</span>
 									
 									<span class="light">enchant.Class.</span><b>getInheritanceTree</b>()
 								</div>
@@ -679,7 +699,7 @@ new class will inherit the class definition.</dd>
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{ConstructorFunction}</span> <b></b>
+												<span class="light fixedFont">{Function}</span> <b></b>
 												
 											</dt>
 											<dd></dd>
@@ -699,7 +719,7 @@ new class will inherit the class definition.</dd>
 										
 											<dt class="heading">Returns:</dt>
 											
-												<dd><span class="light fixedFont">{...ConstructorFunction}</span> </dd>
+												<dd><span class="light fixedFont">{Function[]}</span> </dd>
 											
 										
 										

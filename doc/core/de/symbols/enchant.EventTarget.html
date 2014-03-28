@@ -42,11 +42,21 @@
 				
 					<li><a href="../symbols/enchant.ActionEventTarget.html">enchant<span class='break'> </span>.<span class='break'> </span>ActionEventTarget</a></li>
 				
+					<li><a href="../symbols/enchant.BinaryInputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>BinaryInputManager</a></li>
+				
+					<li><a href="../symbols/enchant.BinaryInputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>BinaryInputSource</a></li>
+				
 					<li><a href="../symbols/enchant.CanvasLayer.html">enchant<span class='break'> </span>.<span class='break'> </span>CanvasLayer</a></li>
+				
+					<li><a href="../symbols/enchant.CanvasScene.html">enchant<span class='break'> </span>.<span class='break'> </span>CanvasScene</a></li>
 				
 					<li><a href="../symbols/enchant.Class.html">enchant<span class='break'> </span>.<span class='break'> </span>Class</a></li>
 				
 					<li><a href="../symbols/enchant.Core.html">enchant<span class='break'> </span>.<span class='break'> </span>Core</a></li>
+				
+					<li><a href="../symbols/enchant.Deferred.html">enchant<span class='break'> </span>.<span class='break'> </span>Deferred</a></li>
+				
+					<li><a href="../symbols/enchant.DOMScene.html">enchant<span class='break'> </span>.<span class='break'> </span>DOMScene</a></li>
 				
 					<li><a href="../symbols/enchant.DOMSound.html">enchant<span class='break'> </span>.<span class='break'> </span>DOMSound</a></li>
 				
@@ -60,11 +70,21 @@
 				
 					<li><a href="../symbols/enchant.EventTarget.html">enchant<span class='break'> </span>.<span class='break'> </span>EventTarget</a></li>
 				
+					<li><a href="../symbols/enchant.Game.html">enchant<span class='break'> </span>.<span class='break'> </span>Game</a></li>
+				
 					<li><a href="../symbols/enchant.Group.html">enchant<span class='break'> </span>.<span class='break'> </span>Group</a></li>
+				
+					<li><a href="../symbols/enchant.InputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>InputManager</a></li>
+				
+					<li><a href="../symbols/enchant.InputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>InputSource</a></li>
+				
+					<li><a href="../symbols/enchant.KeyboardInputManager.html">enchant<span class='break'> </span>.<span class='break'> </span>KeyboardInputManager</a></li>
+				
+					<li><a href="../symbols/enchant.KeyboardInputSource.html">enchant<span class='break'> </span>.<span class='break'> </span>KeyboardInputSource</a></li>
 				
 					<li><a href="../symbols/enchant.Label.html">enchant<span class='break'> </span>.<span class='break'> </span>Label</a></li>
 				
-					<li><a href="../symbols/enchant.LoadingScene..html">enchant<span class='break'> </span>.<span class='break'> </span>LoadingScene<span class='break'> </span>.<span class='break'> </span></a></li>
+					<li><a href="../symbols/enchant.LoadingScene.html">enchant<span class='break'> </span>.<span class='break'> </span>LoadingScene</a></li>
 				
 					<li><a href="../symbols/enchant.Map.html">enchant<span class='break'> </span>.<span class='break'> </span>Map</a></li>
 				
@@ -91,7 +111,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2013-4-1 1:13
+		Generated on: 2014-2-28 18:42
 	</div>
 </div>
 
@@ -118,9 +138,7 @@ Jedoch wird das Phasenkonzept nicht unterstützt.
 					
 						<li>Defined in: <a href="../symbols/src/lang_de_enchant.js.html">enchant.js</a></li>
 					
-						<li>Extends <span class="fixedFont">
-						</span></li>
-					
+						
 				</ul>
 			
 		</div>
@@ -189,7 +207,7 @@ Events ausgeführt wird.</div>
 								>
 									<td class="attributes">&nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont"><b><a href="../symbols/enchant.EventTarget.html#clearEventListener">clearEventListener</a></b>(String)
+										<div class="fixedFont"><b><a href="../symbols/enchant.EventTarget.html#clearEventListener">clearEventListener</a></b>(type)
 										</div>
 										<div class="description">Entfernt alle Ereignisbeobachter für einen Typ.</div>
 									</td>
@@ -213,7 +231,7 @@ Events ausgeführt wird.</div>
 									<td class="nameDescription">
 										<div class="fixedFont"><b><a href="../symbols/enchant.EventTarget.html#on">on</a></b>(type, listener)
 										</div>
-										<div class="description">Synonym for addEventListener</div>
+										<div class="description">Synonym für addEventListener.</div>
 									</td>
 								</tr>
 							
@@ -319,7 +337,7 @@ Events ausgeführt wird.
 											<dd>Ereignis Typ.</dd>
 										
 											<dt>
-												<span class="light fixedFont">{function(e:enchant.Event)}</span> <b>listener</b>
+												<span class="light fixedFont">{Function(e:enchant.Event)}</span> <b>listener</b>
 												
 											</dt>
 											<dd>Der Ereignisbeobachter 
@@ -342,7 +360,7 @@ der hinzugefügt wird.</dd>
 									
 									
 									
-									<b>clearEventListener</b>(String)
+									<b>clearEventListener</b>(type)
 								</div>
 								
 								<div class="description">
@@ -362,10 +380,10 @@ Ereignisbeobachter entfernt.
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<b>String</b>
-												<i>Optional</i>
+												<span class="light fixedFont">{String}</span> <b>type</b>
+												
 											</dt>
-											<dd>type Ereignis Typ.</dd>
+											<dd>Ereignis Typ.</dd>
 										
 									</dl>
 								
@@ -428,7 +446,7 @@ Ereignisbeobachter entfernt.
 								</div>
 								
 								<div class="description">
-									Synonym for addEventListener
+									Synonym für addEventListener.
 									
 									
 									
@@ -445,13 +463,14 @@ Ereignisbeobachter entfernt.
 												<span class="light fixedFont">{String}</span> <b>type</b>
 												
 											</dt>
-											<dd>Type of the events.</dd>
+											<dd>Ereignis Typ.</dd>
 										
 											<dt>
-												<span class="light fixedFont">{function(e:enchant.Event)}</span> <b>listener</b>
+												<span class="light fixedFont">{Function(e:enchant.Event)}</span> <b>listener</b>
 												
 											</dt>
-											<dd>Event listener to be added.</dd>
+											<dd>Der Ereignisbeobachter 
+der hinzugefügt wird.</dd>
 										
 									</dl>
 								
@@ -472,7 +491,7 @@ Ereignisbeobachter entfernt.
 										
 											<dt class="heading">See:</dt>
 											
-												<dd></dd>
+												<dd><a href="../symbols/enchant.EventTarget.html#addEventListener">enchant.EventTarget#addEventListener</a></dd>
 											
 										
 									
@@ -510,12 +529,12 @@ Ereignisbeobachter entfernt.
 										
 											<dt>
 												<span class="light fixedFont">{String}</span> <b>type</b>
-												
+												<i>Optional</i>
 											</dt>
 											<dd>Ereignis Typ.</dd>
 										
 											<dt>
-												<span class="light fixedFont">{function(e:enchant.Event)}</span> <b>listener</b>
+												<span class="light fixedFont">{Function(e:enchant.Event)}</span> <b>listener</b>
 												
 											</dt>
 											<dd>Der Ereignisbeobachter 

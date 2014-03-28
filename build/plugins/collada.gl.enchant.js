@@ -5,7 +5,6 @@
  * @require enchant.js v0.6.3+
  * @require gl.enchant.js v0.3.5+
  * @author Ubiquitous Entertainment Inc.
- *
  * @description
  * Plugin to load collada format (.dae) files on gl.enchant.js
  *
