@@ -2636,7 +2636,7 @@
          * @type {enchant.Entity}
          */
         content: {
-            oet: function() {
+            get: function() {
                 return this._content;
             },
             set: function(content) {
