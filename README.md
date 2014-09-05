@@ -3,13 +3,13 @@ enchant.js
 
 Pre-built files of [wise9/enchant.js](https://github.com/wise9/enchant.js).
 
-<img src="http://github.com/wise9/enchant.js/raw/master/enchant.png" width="320" height="320">
+<img src="https://raw.githubusercontent.com/wise9/enchant.js/master/enchant.png" width="320" height="320">
 
 [![Build Status](https://secure.travis-ci.org/wise9/enchant.js.png)](https://travis-ci.org/wise9/enchant.js)
 
 Download
 --------
-> v0.8.0
+> v0.8.2
 
 - [enchant.js](https://raw.github.com/uei/enchant.js-builds/master/build/enchant.js)
 - [enchant.min.js](https://raw.github.com/uei/enchant.js-builds/master/build/enchant.min.js) (compressed)
