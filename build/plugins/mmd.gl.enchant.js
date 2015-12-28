@@ -732,6 +732,7 @@ var MMD = {};
         stride: 0,
         offset: 0,
         btype: 34962,
+        usage: 35044,
         Atype: Float32Array
     };
     bufferProto.EDGES = {
@@ -741,6 +742,7 @@ var MMD = {};
         stride: 0,
         offset: 0,
         btype: 34962,
+        usage: 35044,
         Atype: Uint16Array
     };
 

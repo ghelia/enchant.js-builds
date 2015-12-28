@@ -1645,6 +1645,7 @@ if (enchant.gl !== undefined) {
             stride: 0,
             offset: 0,
             btype: 34962,
+            usage: 35044,
             Atype: Uint16Array
         };
         bufferProto.WEIGHTS = {
@@ -1654,6 +1655,7 @@ if (enchant.gl !== undefined) {
             stride: 0,
             offset: 0,
             btype: 34962,
+            usage: 35044,
             Atype: Float32Array
         };
         var COLLADA_VERTEX_SHADER_SOURCE = '\n\

@@ -9,10 +9,10 @@ Pre-built files of [wise9/enchant.js](https://github.com/wise9/enchant.js).
 
 Download
 --------
-> v0.8.2
+> v0.8.3
 
 - [enchant.js](https://raw.github.com/uei/enchant.js-builds/master/build/enchant.js)
-- [enchant.min.js](https://raw.github.com/uei/enchant.js-builds/master/build/enchant.min.js) (compressed)
+- [enchant.min.js](https://raw.github.com/uei/enchant.js-builds/master/enchant.min.js) (compressed)
 
 - [Download Zip](https://github.com/wise9/enchant.js/archive/master.zip)
 

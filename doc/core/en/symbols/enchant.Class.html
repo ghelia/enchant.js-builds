@@ -111,7 +111,7 @@
 		
 		Documentation generator: <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0<br />
 		Template: <a href="http://www.thebrightlines.com/2010/05/06/new-template-for-jsdoctoolkit-codeview/" target="_blank">Codeview</a> 1.2<br />
-		Generated on: 2014-6-22 16:09
+		Generated on: 2015-11-29 0:10
 	</div>
 </div>
 
@@ -195,7 +195,7 @@
 									<td class="nameDescription">
 										<div class="fixedFont">enchant.Class.<b><a href="../symbols/enchant.Class.html#.create">create</a></b>(superclass, definition)
 										</div>
-										<div class="description">Create a class.</div>
+										<div class="description">Creates a class.</div>
 									</td>
 								</tr>
 							
@@ -204,7 +204,7 @@
 								>
 									<td class="attributes">&lt;static&gt; &nbsp;</td>
 									<td class="nameDescription">
-										<div class="fixedFont">enchant.Class.<b><a href="../symbols/enchant.Class.html#.getInheritanceTree">getInheritanceTree</a></b>()
+										<div class="fixedFont">enchant.Class.<b><a href="../symbols/enchant.Class.html#.getInheritanceTree">getInheritanceTree</a></b>(Constructor)
 										</div>
 										<div class="description">Get the inheritance tree of this class.</div>
 									</td>
@@ -298,11 +298,12 @@ new class will inherit the class definition.</dd>
 								</div>
 								
 								<div class="description">
-									Create a class.
+									Creates a class.
 
-When defining classes that inherit from other classes, the previous class is used as a base with
-the superclass's constructor as default. When overriding the default constructor, it is necessary
-to explicitly call the previous constructor to ensure a correct class initialization.
+When defining a class that extends from another class, 
+the constructor of the other class will be used by default.
+Even if you override this constructor, you must still call it
+to ensure that the class is initialized correctly.
 									
 									
 									
@@ -311,15 +312,32 @@ to explicitly call the previous constructor to ensure a correct class initializa
 								
 								
 									
-										<pre class="code">var Ball = Class.create({ // Creates independent class.
-    initialize: function(radius) { ... }, // Method definition.
-    fall: function() { ... }
+										<pre class="code">// Creates a Ball class.
+var Ball = Class.create({ 
+
+    // Ball's constructor
+    initialize: function(radius) {
+      // ... code ...
+    }, 
+
+    // Defines a fall method that doesn't take any arguments.
+    fall: function() { 
+      // ... code ...
+    }
 });
 
-var Ball = Class.create(Sprite);  // Creates a class inheriting from "Sprite"
-var Ball = Class.create(Sprite, { // Creates a class inheriting "Sprite"
-    initialize: function(radius) { // Overwrites constructor
-        Sprite.call(this, radius * 2, radius * 2); // Applies previous constructor.
+// Creates a Ball class that extends from "Sprite"
+var Ball = Class.create(Sprite);  
+
+// Creates a Ball class that extends from "Sprite"
+var Ball = Class.create(Sprite, { 
+
+    // Overwrite Sprite's constructor
+    initialize: function(radius) { 
+
+        // Call Sprite's constructor.
+        Sprite.call(this, radius * 2, radius * 2);
+
         this.image = core.assets['ball.gif'];
     }
 });</pre>
@@ -360,7 +378,7 @@ new class will inherit the class definition.</dd>
 									
 									<span class="light">{Function[]}</span>
 									
-									<span class="light">enchant.Class.</span><b>getInheritanceTree</b>()
+									<span class="light">enchant.Class.</span><b>getInheritanceTree</b>(Constructor)
 								</div>
 								
 								<div class="description">
@@ -378,7 +396,7 @@ new class will inherit the class definition.</dd>
 										<dt class="heading">Parameters:</dt>
 										
 											<dt>
-												<span class="light fixedFont">{Function}</span> <b></b>
+												<span class="light fixedFont">{Function}</span> <b>Constructor</b>
 												
 											</dt>
 											<dd></dd>
@@ -398,7 +416,7 @@ new class will inherit the class definition.</dd>
 										
 											<dt class="heading">Returns:</dt>
 											
-												<dd><span class="light fixedFont">{Function[]}</span> </dd>
+												<dd><span class="light fixedFont">{Function[]}</span> Parent's constructor</dd>
 											
 										
 										

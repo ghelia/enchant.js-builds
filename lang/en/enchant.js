@@ -1,5 +1,5 @@
 /**
- * enchant.js v0.8.2
+ * enchant.js v0.8.3
  * http://enchantjs.com
  *
  * Copyright Ubiquitous Entertainment Inc.
@@ -212,22 +212,40 @@ enchant.Class = function(superclass, definition) {
 };
 
 /**
- * Create a class.
+ * Creates a class.
  *
- * When defining classes that inherit from other classes, the previous class is used as a base with
- * the superclass's constructor as default. When overriding the default constructor, it is necessary
- * to explicitly call the previous constructor to ensure a correct class initialization.
+ * When defining a class that extends from another class, 
+ * the constructor of the other class will be used by default.
+ * Even if you override this constructor, you must still call it
+ * to ensure that the class is initialized correctly.
  *
  * @example
- * var Ball = Class.create({ // Creates independent class.
- *     initialize: function(radius) { ... }, // Method definition.
- *     fall: function() { ... }
+ * // Creates a Ball class.
+ * var Ball = Class.create({ 
+ *
+ *     // Ball's constructor
+ *     initialize: function(radius) {
+ *       // ... code ...
+ *     }, 
+ *
+ *     // Defines a fall method that doesn't take any arguments.
+ *     fall: function() { 
+ *       // ... code ...
+ *     }
  * });
  *
- * var Ball = Class.create(Sprite);  // Creates a class inheriting from "Sprite"
- * var Ball = Class.create(Sprite, { // Creates a class inheriting "Sprite"
- *     initialize: function(radius) { // Overwrites constructor
- *         Sprite.call(this, radius * 2, radius * 2); // Applies previous constructor.
+ * // Creates a Ball class that extends from "Sprite"
+ * var Ball = Class.create(Sprite);  
+ *
+ * // Creates a Ball class that extends from "Sprite"
+ * var Ball = Class.create(Sprite, { 
+ *
+ *     // Overwrite Sprite's constructor
+ *     initialize: function(radius) { 
+ *
+ *         // Call Sprite's constructor.
+ *         Sprite.call(this, radius * 2, radius * 2);
+ *
  *         this.image = core.assets['ball.gif'];
  *     }
  * });
@@ -289,8 +307,8 @@ enchant.Class.create = function(superclass, definition) {
 
 /**
  * Get the inheritance tree of this class.
- * @param {Function}
- * @return {Function[]}
+ * @param {Function} Constructor
+ * @return {Function[]} Parent's constructor
  */
 enchant.Class.getInheritanceTree = function(Constructor) {
     var ret = [];
@@ -314,7 +332,7 @@ enchant.ENV = {
      * Version of enchant.js
      * @type String
      */
-    VERSION: '0.8.2',
+    VERSION: '0.8.3',
     /**
      * Identifier of the current browser.
      * @type String
@@ -434,7 +452,7 @@ enchant.ENV = {
      * If keydown event occure for these keycodes the setPreventDefault() method will be called.
      * @type Number[]
      */
-    PREVENT_DEFAULT_KEY_CODES: [37, 38, 39, 40, 32],
+    PREVENT_DEFAULT_KEY_CODES: [37, 38, 39, 40],
     /**
      * Determines if Sound is enabled on Mobile Safari.
      * @type Boolean
@@ -459,7 +477,13 @@ enchant.ENV = {
      * Determines if animation feature is enabled. (true: Timeline instance will be generated in new Node)
      * @type Boolean
      */
-    USE_ANIMATION: true
+    USE_ANIMATION: true,
+    /**
+     * Specifies range of the touch detection.
+     * The detection area will be (COLOR_DETECTION_LEVEL * 2 + 1)px square.
+     * @type Boolean
+     */
+    COLOR_DETECTION_LEVEL: 2
 };
 
 /**
@@ -1546,6 +1570,7 @@ enchant.EventTarget = enchant.Class.create({
             var e = new enchant.Event('enterframe');
             var now = window.getTime();
             var elapsed = e.elapsed = now - this.currentTime;
+            this.currentTime = now;
 
             this._actualFps = elapsed > 0 ? (1000 / elapsed) : 0;
 
@@ -1567,7 +1592,7 @@ enchant.EventTarget = enchant.Class.create({
             this.dispatchEvent(new enchant.Event('exitframe'));
             this.frame++;
             now = window.getTime();
-            this.currentTime = now;
+            
             this._requestNextFrame(1000 / this.fps - (now - this._calledTime));
         },
         getTime: function() {
@@ -2172,9 +2197,8 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
      * @param {Number} y Target y coordinates.
      */
     moveTo: function(x, y) {
-        this._x = x;
-        this._y = y;
-        this._dirty = true;
+        this.x = x;
+        this.y = y;
     },
     /**
      * Move the Node relative to its current position.
@@ -2182,9 +2206,8 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
      * @param {Number} y y axis movement distance.
      */
     moveBy: function(x, y) {
-        this._x += x;
-        this._y += y;
-        this._dirty = true;
+        this.x += x;
+        this.y += y;
     },
     /**
      * x coordinates of the Node.
@@ -2195,8 +2218,10 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
             return this._x;
         },
         set: function(x) {
-            this._x = x;
-            this._dirty = true;
+            if(this._x !== x) {
+                this._x = x;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2208,8 +2233,10 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
             return this._y;
         },
         set: function(y) {
-            this._y = y;
-            this._dirty = true;
+            if(this._y !== y) {
+                this._y = y;
+                this._dirty = true;
+            }
         }
     },
     _updateCoordinate: function() {
@@ -2245,12 +2272,17 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
         matrix.reset();
     },
     remove: function() {
-        if (this._listener) {
-            this.clearEventListener();
-        }
         if (this.parentNode) {
             this.parentNode.removeChild(this);
         }
+        if (this.childNodes) {
+            var childNodes = this.childNodes.slice();
+            for(var i = childNodes.length-1; i >= 0; i--) {
+                childNodes[i].remove();
+            }
+        }
+        
+        this.clearEventListener();
     }
 });
 
@@ -2325,6 +2357,8 @@ var _staticIntersectStrict = function(other) {
     }
     return false;
 };
+
+var _nodePrototypeClearEventListener = enchant.Node.prototype.clearEventListener;
 
 /**
  * @scope enchant.Entity.prototype
@@ -2410,8 +2444,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             return this._width;
         },
         set: function(width) {
-            this._width = width;
-            this._dirty = true;
+            if(this._width !== width) {
+                this._width = width;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2423,8 +2459,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             return this._height;
         },
         set: function(height) {
-            this._height = height;
-            this._dirty = true;
+            if(this._height !== height) {
+                this._height = height;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2633,8 +2671,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
      * @param {Number} deg Rotation angle (degree).
      */
     rotate: function(deg) {
-        this._rotation += deg;
-        this._dirty = true;
+        this.rotation += deg;
     },
     /**
      * Scaling factor on the x axis of this Entity.
@@ -2645,8 +2682,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             return this._scaleX;
         },
         set: function(scaleX) {
-            this._scaleX = scaleX;
-            this._dirty = true;
+            if(this._scaleX !== scaleX) {
+                this._scaleX = scaleX;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2658,8 +2697,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             return this._scaleY;
         },
         set: function(scaleY) {
-            this._scaleY = scaleY;
-            this._dirty = true;
+            if(this._scaleY !== scaleY) {
+                this._scaleY = scaleY;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2671,8 +2712,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             return this._rotation;
         },
         set: function(rotation) {
-            this._rotation = rotation;
-            this._dirty = true;
+            if(this._rotation !== rotation) {
+                this._rotation = rotation;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2684,8 +2727,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             return this._originX;
         },
         set: function(originX) {
-            this._originX = originX;
-            this._dirty = true;
+            if(this._originX !== originX) {
+                this._originX = originX;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2697,8 +2742,10 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             return this._originY;
         },
         set: function(originY) {
-            this._originY = originY;
-            this._dirty = true;
+            if(this._originY !== originY) {
+                this._originY = originY;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -2719,6 +2766,14 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
             this._removeSelfFromCollection();
         }
     },
+    /**#nocode+*/
+    clearEventListener: function() {
+        _nodePrototypeClearEventListener.apply(this,arguments);
+        if (this.scene) {
+            this._removeSelfFromCollection();
+        }
+    },
+    /**#nocode-*/
     _addSelfToCollection: function() {
         if (this._isContainedInCollection) {
             return;
@@ -2834,10 +2889,7 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
         this._frameLeft = 0;
         this._frameTop = 0;
         this._frame = 0;
-        this._frameSequence = [];
-
-        // frame に配列が指定されたときの処理.
-        this.addEventListener(enchant.Event.ENTER_FRAME, this._rotateFrameSequence);
+        this._frameSequence = null;
     },
     /**
      * Image displayed in the Sprite.
@@ -2859,8 +2911,8 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
         }
     },
     /**
-     * Indizes of the frames to be displayed.
-     * Frames with same width and height as Sprite will be arrayed from upper left corner of the 
+     * Index of the frame to be displayed.
+     * Frames with the same width and height as Sprite will be arrayed from upper left corner of the 
      * {@link enchant.Sprite#image} image. When a sequence of numbers is provided, the displayed frame 
      * will switch automatically. At the end of the array the sequence will restart. By setting 
      * a value within the sequence to null, the frame switching is stopped.
@@ -2879,17 +2931,35 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
             return this._frame;
         },
         set: function(frame) {
-            if (this._frame === frame || (frame instanceof Array && this._deepCompareToPreviousFrame(frame))) {
+            if (((this._frameSequence == null) && (this._frame === frame)) || (this._deepCompareToPreviousFrame(frame))) {
                 return;
             }
             if (frame instanceof Array) {
-                this._frameSequence = frame.slice();
-                this._originalFrameSequence = frame.slice();
-                this._rotateFrameSequence();
+                this._frameSequence = frame;
             } else {
-                this._frameSequence = [];
+                this._frameSequence = null;
                 this._frame = frame;
                 this._computeFramePosition();
+            }
+        }
+    },
+    _frameSequence: {
+        get: function() {
+            return this.__frameSequence;
+        },
+        set: function(frameSequence) {
+            if(frameSequence && !this.__frameSequence) {
+                this.addEventListener(enchant.Event.ENTER_FRAME, this._rotateFrameSequence);
+            } else if(!frameSequence && this.__frameSequence) {
+                this.removeEventListener(enchant.Event.ENTER_FRAME, this._rotateFrameSequence);
+            }
+            if(frameSequence) {
+                this.__frameSequence = frameSequence.slice();
+                this._originalFrameSequence = frameSequence.slice();
+                this._rotateFrameSequence();
+            } else {
+                this.__frameSequence = null;
+                this._originalFrameSequence = null;
             }
         }
     },
@@ -2903,6 +2973,9 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
             return true;
         }
         if (frameArray == null || this._originalFrameSequence == null) {
+            return false;
+        }
+        if (!(frameArray instanceof Array)) {
             return false;
         }
         if (frameArray.length !== this._originalFrameSequence.length) {
@@ -2929,15 +3002,16 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
         }
     },
     _rotateFrameSequence: function() {
-        if (this._frameSequence.length !== 0) {
-            var nextFrame = this._frameSequence.shift();
+        var frameSequence = this._frameSequence;
+        if (frameSequence && frameSequence.length !== 0) {
+            var nextFrame = frameSequence.shift();
             if (nextFrame === null) {
-                this._frameSequence = [];
+                this._frameSequence = null;
                 this.dispatchEvent(new enchant.Event(enchant.Event.ANIMATION_END));
             } else {
                 this._frame = nextFrame;
                 this._computeFramePosition();
-                this._frameSequence.push(nextFrame);
+                frameSequence.push(nextFrame);
             }
         }
     },
@@ -2968,7 +3042,8 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
             w = this._width, h = this._height,
             iw, ih, elem, sx, sy, sw, sh;
         if (image && w !== 0 && h !== 0) {
-            iw = image.width, ih = image.height;
+            iw = image.width;
+            ih = image.height;
             if (iw < w || ih < h) {
                 ctx.fillStyle = enchant.Surface._getPattern(image);
                 ctx.fillRect(0, 0, w, h);
@@ -3060,7 +3135,7 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
                 return;
             }
             this._text = text;
-            text = text.replace(/<(br|BR) ?\/?>/g, '<br/>');
+            text = text.replace(/<br ?\/?>/gi, '<br/>');
             this._splitText = text.split('<br/>');
             this.updateBoundArea();
             for (var i = 0, l = this._splitText.length; i < l; i++) {
@@ -3069,6 +3144,7 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
                 this._splitText[i] = {};
                 this._splitText[i].text = text;
                 this._splitText[i].height = metrics.height;
+                this._splitText[i].width = metrics.width;
             }
         }
     },
@@ -3194,9 +3270,10 @@ enchant.Label = enchant.Class.create(enchant.Entity, {
             div.style.whiteSpace = 'noWrap';
             div.style.lineHeight = 1;
             document.body.appendChild(div);
-            ret.height = parseInt(getComputedStyle(div).height, 10) + 1;
+            var computedStyle = getComputedStyle(div);
+            ret.height = parseInt(computedStyle.height, 10) + 1;
             div.style.position = 'absolute';
-            ret.width = parseInt(getComputedStyle(div).width, 10) + 1;
+            ret.width = parseInt(computedStyle.width, 10) + 1;
             document.body.removeChild(div);
         } else {
             ret.width = this.width;
@@ -3260,84 +3337,9 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
 
         this._listeners['render'] = null;
         this.addEventListener('render', function() {
-            if (this._dirty || this._previousOffsetX == null) {
-                this.redraw(0, 0, core.width, core.height);
-            } else if (this._offsetX !== this._previousOffsetX ||
-                this._offsetY !== this._previousOffsetY) {
-                if (this._tight) {
-                    var x = -this._offsetX;
-                    var y = -this._offsetY;
-                    var px = -this._previousOffsetX;
-                    var py = -this._previousOffsetY;
-                    var w1 = x - px + core.width;
-                    var w2 = px - x + core.width;
-                    var h1 = y - py + core.height;
-                    var h2 = py - y + core.height;
-                    if (w1 > this._tileWidth && w2 > this._tileWidth &&
-                        h1 > this._tileHeight && h2 > this._tileHeight) {
-                        var sx, sy, dx, dy, sw, sh;
-                        if (w1 < w2) {
-                            sx = 0;
-                            dx = px - x;
-                            sw = w1;
-                        } else {
-                            sx = x - px;
-                            dx = 0;
-                            sw = w2;
-                        }
-                        if (h1 < h2) {
-                            sy = 0;
-                            dy = py - y;
-                            sh = h1;
-                        } else {
-                            sy = y - py;
-                            dy = 0;
-                            sh = h2;
-                        }
-
-                        if (core._buffer == null) {
-                            core._buffer = document.createElement('canvas');
-                            core._buffer.width = this._context.canvas.width;
-                            core._buffer.height = this._context.canvas.height;
-                        }
-                        var context = core._buffer.getContext('2d');
-                        if (this._doubledImage) {
-                            context.clearRect(0, 0, sw * 2, sh * 2);
-                            context.drawImage(this._context.canvas,
-                                sx * 2, sy * 2, sw * 2, sh * 2, 0, 0, sw * 2, sh * 2);
-                            context = this._context;
-                            context.clearRect(dx * 2, dy * 2, sw * 2, sh * 2);
-                            context.drawImage(core._buffer,
-                                0, 0, sw * 2, sh * 2, dx * 2, dy * 2, sw * 2, sh * 2);
-                        } else {
-                            context.clearRect(0, 0, sw, sh);
-                            context.drawImage(this._context.canvas,
-                                sx, sy, sw, sh, 0, 0, sw, sh);
-                            context = this._context;
-                            context.clearRect(dx, dy, sw, sh);
-                            context.drawImage(core._buffer,
-                                0, 0, sw, sh, dx, dy, sw, sh);
-                        }
-
-                        if (dx === 0) {
-                            this.redraw(sw, 0, core.width - sw, core.height);
-                        } else {
-                            this.redraw(0, 0, core.width - sw, core.height);
-                        }
-                        if (dy === 0) {
-                            this.redraw(0, sh, core.width, core.height - sh);
-                        } else {
-                            this.redraw(0, 0, core.width, core.height - sh);
-                        }
-                    } else {
-                        this.redraw(0, 0, core.width, core.height);
-                    }
-                } else {
-                    this.redraw(0, 0, core.width, core.height);
-                }
+            if(this._dirty) {
+                this._previousOffsetX = this._previousOffsetY = null;
             }
-            this._previousOffsetX = this._offsetX;
-            this._previousOffsetY = this._offsetY;
         });
     },
     /**
@@ -3456,8 +3458,10 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
             return this._tileWidth;
         },
         set: function(tileWidth) {
-            this._tileWidth = tileWidth;
-            this._dirty = true;
+            if(this._tileWidth !== tileWidth) {
+                this._tileWidth = tileWidth;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -3469,8 +3473,10 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
             return this._tileHeight;
         },
         set: function(tileHeight) {
-            this._tileHeight = tileHeight;
-            this._dirty = true;
+            if(this._tileHeight !== tileHeight) {
+                this._tileHeight = tileHeight;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -3543,9 +3549,96 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
             }
         }
     },
+    /**
+     * @private
+     */
+    updateBuffer: function() {
+        if (this._visible === undefined || this._visible) {
+            var core = enchant.Core.instance;
+            if (this._dirty || this._previousOffsetX == null) {
+                this.redraw(0, 0, core.width, core.height);
+            } else if (this._offsetX !== this._previousOffsetX ||
+                    this._offsetY !== this._previousOffsetY) {
+                if (this._tight) {
+                    var x = -this._offsetX;
+                    var y = -this._offsetY;
+                    var px = -this._previousOffsetX;
+                    var py = -this._previousOffsetY;
+                    var w1 = x - px + core.width;
+                    var w2 = px - x + core.width;
+                    var h1 = y - py + core.height;
+                    var h2 = py - y + core.height;
+                    if (w1 > this._tileWidth && w2 > this._tileWidth &&
+                            h1 > this._tileHeight && h2 > this._tileHeight) {
+                        var sx, sy, dx, dy, sw, sh;
+                        if (w1 < w2) {
+                            sx = 0;
+                            dx = px - x;
+                            sw = w1;
+                        } else {
+                            sx = x - px;
+                            dx = 0;
+                            sw = w2;
+                        }
+                        if (h1 < h2) {
+                            sy = 0;
+                            dy = py - y;
+                            sh = h1;
+                        } else {
+                            sy = y - py;
+                            dy = 0;
+                            sh = h2;
+                        }
+
+                        if (core._buffer == null) {
+                            core._buffer = document.createElement('canvas');
+                            core._buffer.width = this._context.canvas.width;
+                            core._buffer.height = this._context.canvas.height;
+                        }
+                        var context = core._buffer.getContext('2d');
+                        if (this._doubledImage) {
+                            context.clearRect(0, 0, sw * 2, sh * 2);
+                            context.drawImage(this._context.canvas,
+                                    sx * 2, sy * 2, sw * 2, sh * 2, 0, 0, sw * 2, sh * 2);
+                            context = this._context;
+                            context.clearRect(dx * 2, dy * 2, sw * 2, sh * 2);
+                            context.drawImage(core._buffer,
+                                    0, 0, sw * 2, sh * 2, dx * 2, dy * 2, sw * 2, sh * 2);
+                        } else {
+                            context.clearRect(0, 0, sw, sh);
+                            context.drawImage(this._context.canvas,
+                                    sx, sy, sw, sh, 0, 0, sw, sh);
+                            context = this._context;
+                            context.clearRect(dx, dy, sw, sh);
+                            context.drawImage(core._buffer,
+                                    0, 0, sw, sh, dx, dy, sw, sh);
+                        }
+
+                        if (dx === 0) {
+                            this.redraw(sw, 0, core.width - sw, core.height);
+                        } else {
+                            this.redraw(0, 0, core.width - sw, core.height);
+                        }
+                        if (dy === 0) {
+                            this.redraw(0, sh, core.width, core.height - sh);
+                        } else {
+                            this.redraw(0, 0, core.width, core.height - sh);
+                        }
+                    } else {
+                        this.redraw(0, 0, core.width, core.height);
+                    }
+                } else {
+                    this.redraw(0, 0, core.width, core.height);
+                }
+            }
+            this._previousOffsetX = this._offsetX;
+            this._previousOffsetY = this._offsetY;
+        }
+    },
     cvsRender: function(ctx) {
-        var core = enchant.Core.instance;
         if (this.width !== 0 && this.height !== 0) {
+            var core = enchant.Core.instance;
+            this.updateBuffer();
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             var cvs = this._context.canvas;
@@ -3555,6 +3648,7 @@ enchant.Map = enchant.Class.create(enchant.Entity, {
     },
     domRender: function(element) {
         if (this._image) {
+            this.updateBuffer();
             this._style['background-image'] = this._surface._css;
             // bad performance
             this._style[enchant.ENV.VENDOR_PREFIX + 'Transform'] = 'matrix(1, 0, 0, 1, 0, 0)';
@@ -3709,8 +3803,10 @@ enchant.Group = enchant.Class.create(enchant.Node, {
             return this._rotation;
         },
         set: function(rotation) {
-            this._rotation = rotation;
-            this._dirty = true;
+            if(this._rotation !== rotation) {
+                this._rotation = rotation;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -3724,8 +3820,10 @@ enchant.Group = enchant.Class.create(enchant.Node, {
             return this._scaleX;
         },
         set: function(scale) {
-            this._scaleX = scale;
-            this._dirty = true;
+            if(this._scaleX !== scale) {
+                this._scaleX = scale;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -3739,8 +3837,10 @@ enchant.Group = enchant.Class.create(enchant.Node, {
             return this._scaleY;
         },
         set: function(scale) {
-            this._scaleY = scale;
-            this._dirty = true;
+            if(this._scaleY !== scale) {
+                this._scaleY = scale;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -3752,8 +3852,10 @@ enchant.Group = enchant.Class.create(enchant.Node, {
             return this._originX;
         },
         set: function(originX) {
-            this._originX = originX;
-            this._dirty = true;
+            if(this._originX !== originX) {
+                this._originX = originX;
+                this._dirty = true;
+            }
         }
     },
     /**
@@ -3765,8 +3867,10 @@ enchant.Group = enchant.Class.create(enchant.Node, {
             return this._originY;
         },
         set: function(originY) {
-            this._originY = originY;
-            this._dirty = true;
+            if(this._originY !== originY) {
+                this._originY = originY;
+                this._dirty = true;
+            }
         }
     },
     /**#nocode+*/
@@ -3876,14 +3980,33 @@ enchant.DetectColorManager = enchant.Class.create({
             1.0
         ];
     },
-    _decodeDetectColor: function(color) {
+    _decodeDetectColor: function(color, i) {
+        i = i || 0;
         var C = this.colorResolution;
-        return ~~(color[0] * C * C * C / 256) +
-            ~~(color[1] * C * C / 256) +
-            ~~(color[2] * C / 256);
+        return ~~(color[i] * C * C * C / 256) +
+            ~~(color[i + 1] * C * C / 256) +
+            ~~(color[i + 2] * C / 256);
     },
     getSpriteByColor: function(color) {
         return this.reference[this._decodeDetectColor(color)];
+    },
+    getSpriteByColors: function(rgba) {
+        var i, l, id, result,
+            score = 0,
+            found = {};
+
+        for (i = 0, l = rgba.length; i < l; i+= 4) {
+            id = this._decodeDetectColor(rgba, i);
+            found[id] = (found[id] || 0) + 1;
+        }
+        for (id in found) {
+            if (found[id] > score) {
+                score = found[id];
+                result = id;
+            }
+        }
+
+        return this.reference[result];
     }
 });
 
@@ -4059,7 +4182,6 @@ enchant.DomlessManager = enchant.Class.create({
     },
     _register: function(element, nextElement) {
         var i = this._domRef.indexOf(nextElement);
-        var childNodes;
         if (element instanceof Array) {
             if (i === -1) {
                 Array.prototype.push.apply(this._domRef, element);
@@ -4349,7 +4471,7 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
     /**
      * @name enchant.CanvasLayer
      * @class
-     * A class which is using HTML Canvas for the rendering.
+     * Class that uses the HTML Canvas for rendering.
      * The rendering of children will be replaced by the Canvas rendering.
      * @constructs
      * @extends enchant.Group
@@ -4376,6 +4498,7 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
 
         this.context = this._element.getContext('2d');
         this._dctx = this._detect.getContext('2d');
+        this._setImageSmoothingEnable();
 
         this._colorManager = new enchant.DetectColorManager(16, 256);
 
@@ -4443,6 +4566,7 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
         set: function(width) {
             this._width = width;
             this._element.width = this._detect.width = width;
+            this._setImageSmoothingEnable();
         }
     },
     /**
@@ -4456,6 +4580,7 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
         set: function(height) {
             this._height = height;
             this._element.height = this._detect.height = height;
+            this._setImageSmoothingEnable();
         }
     },
     addChild: function(node) {
@@ -4466,11 +4591,6 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
         childAdded.next = null;
         this.dispatchEvent(childAdded);
         node.dispatchEvent(new enchant.Event('added'));
-        if (this.scene) {
-            node.scene = this.scene;
-            var addedToScene = new enchant.Event('addedtoscene');
-            node.dispatchEvent(addedToScene);
-        }
     },
     insertBefore: function(node, reference) {
         var i = this.childNodes.indexOf(reference);
@@ -4482,11 +4602,6 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
             childAdded.next = reference;
             this.dispatchEvent(childAdded);
             node.dispatchEvent(new enchant.Event('added'));
-            if (this.scene) {
-                node.scene = this.scene;
-                var addedToScene = new enchant.Event('addedtoscene');
-                node.dispatchEvent(addedToScene);
-            }
         } else {
             this.addChild(node);
         }
@@ -4496,14 +4611,14 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
      */
     _startRendering: function() {
         this.addEventListener('exitframe', this._onexitframe);
-        this._onexitframe(new enchant.Event(enchant.Event.RENDER));
+        this._onexitframe();
     },
     /**
      * @private
      */
     _stopRendering: function() {
-        this.removeEventListener('render', this._onexitframe);
-        this._onexitframe(new enchant.Event(enchant.Event.RENDER));
+        this.removeEventListener('exitframe', this._onexitframe);
+        this._onexitframe();
     },
     _onexitframe: function() {
         var core = enchant.Core.instance;
@@ -4523,8 +4638,15 @@ enchant.CanvasLayer = enchant.Class.create(enchant.Group, {
             enchant.CanvasRenderer.instance.detectRender(ctx, this);
             this._lastDetected = core.frame;
         }
-        var color = ctx.getImageData(x, y, 1, 1).data;
-        return this._colorManager.getSpriteByColor(color);
+        var extra = enchant.ENV.COLOR_DETECTION_LEVEL - 1;
+        var rgba = ctx.getImageData(x - extra, y - extra, 1 + extra * 2, 1 + extra * 2).data;
+        return this._colorManager.getSpriteByColors(rgba);
+    },
+    _setImageSmoothingEnable: function() {
+        this._dctx.imageSmoothingEnabled =
+                this._dctx.msImageSmoothingEnabled =
+                this._dctx.mozImageSmoothingEnabled =
+                this._dctx.webkitImageSmoothingEnabled = false;
     }
 });
 
@@ -4667,7 +4789,10 @@ enchant.Scene = enchant.Class.create(enchant.Group, {
     /**
      * @name enchant.Scene
      * @class
-     * A Class that becomes the root of the display object tree.
+     * Class that becomes the root of the display object tree.
+     * Child {@link Entity} objects are distributed to the Scene layer according to the drawing method.
+     * The DOM of each Scene layer has a ({@link enchant.DOMLayer} and  {@link enchant.CanvasLayer}) and is drawn using the Canvas.
+     * Scenes are drawn in the order that they are added.
      *
      * @example
      * var scene = new Scene();
@@ -4801,6 +4926,15 @@ enchant.Scene = enchant.Class.create(enchant.Group, {
         set: function(color) {
             this._backgroundColor = this._element.style.backgroundColor = color;
         }
+    },
+    remove: function() {
+        this.clearEventListener();
+
+        while (this.childNodes.length > 0) {
+            this.childNodes[0].remove();
+        }
+
+        return enchant.Core.instance.removeScene(this);
     },
     /**#nocode-*/
     _oncoreresize: function(e) {
@@ -5064,12 +5198,12 @@ enchant.Surface = enchant.Class.create(enchant.EventTarget, {
          * Surface width.
          * @type Number
          */
-        this.width = width;
+        this.width = Math.ceil(width);
         /**
          * Surface height.
          * @type Number
          */
-        this.height = height;
+        this.height = Math.ceil(height);
         /**
          * Surface drawing context.
          * @type CanvasRenderingContext2D
@@ -5644,6 +5778,10 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
             throw new Error("This browser does not support WebAudio API.");
         }
         enchant.EventTarget.call(this);
+        if (!enchant.WebAudioSound.audioContext) {
+          enchant.WebAudioSound.audioContext = new window.AudioContext();
+          enchant.WebAudioSound.destination = enchant.WebAudioSound.audioContext.destination;
+        }
         this.context = enchant.WebAudioSound.audioContext;
         this.src = this.context.createBufferSource();
         this.buffer = null;
@@ -5658,7 +5796,7 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
      */
     play: function(dup) {
         if (this._state === 1 && !dup) {
-            this.src.disconnect(this.connectTarget);
+            this.src.disconnect();
         }
         if (this._state !== 2) {
             this._currentTime = 0;
@@ -5808,11 +5946,6 @@ enchant.WebAudioSound.load = function(src, type, callback, onerror) {
     return sound;
 };
 
-if (window.AudioContext) {
-    enchant.WebAudioSound.audioContext = new window.AudioContext();
-    enchant.WebAudioSound.destination = enchant.WebAudioSound.audioContext.destination;
-}
-
 enchant.Sound = window.AudioContext && enchant.ENV.USE_WEBAUDIO ? enchant.WebAudioSound : enchant.DOMSound;
 
 /*
@@ -5826,7 +5959,14 @@ enchant.Sound = window.AudioContext && enchant.ENV.USE_WEBAUDIO ? enchant.WebAud
 
 /**
  * @namespace
- * Easing function library, from "Easing Equations" by Robert Penner.
+ * JavaScript translation of Robert Penner's "Easing Equations" library which is widely used in ActionScript.
+ * 
+ * @param [t] the current time
+ * @param [b] the property's initial value
+ * @param [c] how much the value should change
+ * @param [d] how much time should elapse before value is changed
+ * 
+ * @return {Number}
  * <br/>
  * See: <a href="http://www.robertpenner.com/easing/">
  * http://www.robertpenner.com/easing/</a>
@@ -5835,235 +5975,108 @@ enchant.Sound = window.AudioContext && enchant.ENV.USE_WEBAUDIO ? enchant.WebAud
  * http://www.robertpenner.com/easing/penner_chapter7_tweening.pdf</a>
  */
 enchant.Easing = {
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
     LINEAR: function(t, b, c, d) {
         return c * t / d + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     SWING: function(t, b, c, d) {
         return c * (0.5 - Math.cos(((t / d) * Math.PI)) / 2) + b;
     },
-    // quad
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** quad
     QUAD_EASEIN: function(t, b, c, d) {
         return c * (t /= d) * t + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     QUAD_EASEOUT: function(t, b, c, d) {
         return -c * (t /= d) * (t - 2) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     QUAD_EASEINOUT: function(t, b, c, d) {
         if ((t /= d / 2) < 1) {
             return c / 2 * t * t + b;
         }
         return -c / 2 * ((--t) * (t - 2) - 1) + b;
     },
-    // cubic
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** cubic
     CUBIC_EASEIN: function(t, b, c, d) {
         return c * (t /= d) * t * t + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     CUBIC_EASEOUT: function(t, b, c, d) {
         return c * ((t = t / d - 1) * t * t + 1) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     CUBIC_EASEINOUT: function(t, b, c, d) {
         if ((t /= d / 2) < 1) {
             return c / 2 * t * t * t + b;
         }
         return c / 2 * ((t -= 2) * t * t + 2) + b;
     },
-    // quart
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** quart
     QUART_EASEIN: function(t, b, c, d) {
         return c * (t /= d) * t * t * t + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     QUART_EASEOUT: function(t, b, c, d) {
         return -c * ((t = t / d - 1) * t * t * t - 1) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     QUART_EASEINOUT: function(t, b, c, d) {
         if ((t /= d / 2) < 1) {
             return c / 2 * t * t * t * t + b;
         }
         return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
     },
-    // quint
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** quint
     QUINT_EASEIN: function(t, b, c, d) {
         return c * (t /= d) * t * t * t * t + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     QUINT_EASEOUT: function(t, b, c, d) {
         return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     QUINT_EASEINOUT: function(t, b, c, d) {
         if ((t /= d / 2) < 1) {
             return c / 2 * t * t * t * t * t + b;
         }
         return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
     },
-    //sin
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** sin
     SIN_EASEIN: function(t, b, c, d) {
         return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     SIN_EASEOUT: function(t, b, c, d) {
         return c * Math.sin(t / d * (Math.PI / 2)) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     SIN_EASEINOUT: function(t, b, c, d) {
         return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
     },
-    // circ
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** circ
     CIRC_EASEIN: function(t, b, c, d) {
         return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     CIRC_EASEOUT: function(t, b, c, d) {
         return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     CIRC_EASEINOUT: function(t, b, c, d) {
         if ((t /= d / 2) < 1) {
             return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
         }
         return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
     },
-    // elastic
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** elastic
     ELASTIC_EASEIN: function(t, b, c, d, a, p) {
         if (t === 0) {
             return b;
@@ -6085,13 +6098,7 @@ enchant.Easing = {
         }
         return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     ELASTIC_EASEOUT: function(t, b, c, d, a, p) {
         if (t === 0) {
             return b;
@@ -6111,13 +6118,7 @@ enchant.Easing = {
         }
         return (a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b);
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     ELASTIC_EASEINOUT: function(t, b, c, d, a, p) {
         if (t === 0) {
             return b;
@@ -6140,14 +6141,8 @@ enchant.Easing = {
         }
         return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * 0.5 + c + b;
     },
-    // bounce
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** bounce
     BOUNCE_EASEOUT: function(t, b, c, d) {
         if ((t /= d) < (1 / 2.75)) {
             return c * (7.5625 * t * t) + b;
@@ -6159,23 +6154,11 @@ enchant.Easing = {
             return c * (7.5625 * (t -= (2.625 / 2.75)) * t + 0.984375) + b;
         }
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     BOUNCE_EASEIN: function(t, b, c, d) {
         return c - enchant.Easing.BOUNCE_EASEOUT(d - t, 0, c, d) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     BOUNCE_EASEINOUT: function(t, b, c, d) {
         if (t < d / 2) {
             return enchant.Easing.BOUNCE_EASEIN(t * 2, 0, c, d) * 0.5 + b;
@@ -6184,40 +6167,22 @@ enchant.Easing = {
         }
 
     },
-    // back
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** back
     BACK_EASEIN: function(t, b, c, d, s) {
         if (s === undefined) {
             s = 1.70158;
         }
         return c * (t /= d) * t * ((s + 1) * t - s) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     BACK_EASEOUT: function(t, b, c, d, s) {
         if (s === undefined) {
             s = 1.70158;
         }
         return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     BACK_EASEINOUT: function(t, b, c, d, s) {
         if (s === undefined) {
             s = 1.70158;
@@ -6227,34 +6192,16 @@ enchant.Easing = {
         }
         return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
     },
-    // expo
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
+    // *** expo
     EXPO_EASEIN: function(t, b, c, d) {
         return (t === 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     EXPO_EASEOUT: function(t, b, c, d) {
         return (t === d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
     },
-    /**
-     * @param t
-     * @param b
-     * @param c
-     * @param d
-     * @return {Number}
-     */
+
     EXPO_EASEINOUT: function(t, b, c, d) {
         if (t === 0) {
             return b;
@@ -6284,15 +6231,11 @@ enchant.ActionEventTarget = enchant.Class.create(enchant.EventTarget, {
         enchant.EventTarget.apply(this, arguments);
     },
     dispatchEvent: function(e) {
-        var target;
-        if (this.node) {
-            target = this.node;
-            e.target = target;
-            e.localX = e.x - target._offsetX;
-            e.localY = e.y - target._offsetY;
-        } else {
-            this.node = null;
-        }
+        var target = this.node ? this.node : this;
+
+        e.target = target;
+        e.localX = e.x - target._offsetX;
+        e.localY = e.y - target._offsetY;
 
         if (this['on' + e.type] != null) {
             this['on' + e.type].call(target, e);
@@ -6334,7 +6277,12 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         this.isFrameBased = true;
         this._parallel = null;
         this._activated = false;
-        this.addEventListener(enchant.Event.ENTER_FRAME, this.tick);
+        this.addEventListener(enchant.Event.ENTER_FRAME, this._onenterframe);
+
+        var tl = this;
+        this._nodeEventListener = function(e) {
+            tl.dispatchEvent(e);
+        };
     },
     /**
      * @private
@@ -6355,6 +6303,16 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
+     * @private
+     */
+    _onenterframe: function(evt) {
+        if (this.paused) {
+            return;
+        }
+
+        this.tick(this.isFrameBased ? 1 : evt.elapsed);
+    },
+    /**
      */
     setFrameBased: function() {
         this.isFrameBased = true;
@@ -6373,40 +6331,32 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
             e = new enchant.Event("actionend");
             e.timeline = this;
             action.dispatchEvent(e);
+
+            e = new enchant.Event("removedfromtimeline");
+            e.timeline = this;
+            action.dispatchEvent(e);
+
+            if (this.looped) {
+                this.add(action);
+            }
         }
 
         if (this.queue.length === 0) {
-            this._activated = false;
-            this.node.removeEventListener('enterframe', this._nodeEventListener);
+            this._deactivateTimeline();
             return;
         }
 
-        if (this.looped) {
-            e = new enchant.Event("removedfromtimeline");
-            e.timeline = this;
-            action.dispatchEvent(e);
-            action.frame = 0;
-
-            this.add(action);
-        } else {
-            // remove after dispatching removedfromtimeline event
-            e = new enchant.Event("removedfromtimeline");
-            e.timeline = this;
-            action.dispatchEvent(e);
-        }
         if (remainingTime > 0 || (this.queue[0] && this.queue[0].time === 0)) {
-            var event = new enchant.Event("enterframe");
+            var event = new enchant.Event("actiontick");
             event.elapsed = remainingTime;
-            this.dispatchEvent(event);
+            event.timeline = this;
+            this.queue[0].dispatchEvent(event);
         }
     },
     /**
-     * @param {enchant.Event} enterFrameEvent
+     * @param {Number} elapsed
      */
-    tick: function(enterFrameEvent) {
-        if (this.paused) {
-            return;
-        }
+    tick: function(elapsed) {
         if (this.queue.length > 0) {
             var action = this.queue[0];
             if (action.frame === 0) {
@@ -6418,11 +6368,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
 
             var e = new enchant.Event("actiontick");
             e.timeline = this;
-            if (this.isFrameBased) {
-                e.elapsed = 1;
-            } else {
-                e.elapsed = enterFrameEvent.elapsed;
-            }
+            e.elapsed = elapsed;
             action.dispatchEvent(e);
         }
     },
@@ -6431,15 +6377,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     add: function(action) {
-        if (!this._activated) {
-            var tl = this;
-            this._nodeEventListener = function(e) {
-                tl.dispatchEvent(e);
-            };
-            this.node.addEventListener("enterframe", this._nodeEventListener);
-
-            this._activated = true;
-        }
+        this._activateTimeline();
         if (this._parallel) {
             this._parallel.actions.push(action);
             this._parallel = null;
@@ -6542,10 +6480,9 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     delay: function(time) {
-        this.add(new enchant.Action({
+        return this.action({
             time: time
-        }));
-        return this;
+        });
     },
     /**
      * @ignore
@@ -6560,22 +6497,20 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     then: function(func) {
-        var timeline = this;
-        this.add(new enchant.Action({
+        return this.action({
             onactiontick: function(evt) {
-                func.call(timeline.node);
+                func.call(this);
             },
             // if time is 0, next action will be immediately executed
             time: 0
-        }));
-        return this;
+        });
     },
     /**
      * @param {Function} func
      * @return {enchant.Timeline}
      */
     exec: function(func) {
-        this.then(func);
+        return this.then(func);
     },
     /**
      * @param {Object} cue
@@ -6590,6 +6525,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
                 ptr = frame;
             }
         }
+        return this;
     },
     /**
      * @param {Function} func
@@ -6597,13 +6533,12 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     repeat: function(func, time) {
-        this.add(new enchant.Action({
+        return this.action({
             onactiontick: function(evt) {
                 func.call(this);
             },
             time: time
-        }));
-        return this;
+        });
     },
     /**
      * @return {enchant.Timeline}
@@ -6644,16 +6579,13 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     waitUntil: function(func) {
-        var timeline = this;
-        this.add(new enchant.Action({
-            onactionstart: func,
+        return this.action({
             onactiontick: function(evt) {
                 if (func.call(this)) {
-                    timeline.next();
+                    evt.timeline.next();
                 }
             }
-        }));
-        return this;
+        });
     },
     /**
      * @param {Number} opacity
@@ -6662,12 +6594,11 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     fadeTo: function(opacity, time, easing) {
-        this.tween({
+        return this.tween({
             opacity: opacity,
             time: time,
             easing: easing
         });
-        return this;
     },
     /**
      * @param {Number} time
@@ -6766,7 +6697,7 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      */
     removeFromScene: function() {
         return this.then(function() {
-            this.scene.removeChild(this);
+            this.parentNode.removeChild(this);
         });
     },
     /**
@@ -6777,17 +6708,20 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     scaleTo: function(scale, time, easing) {
+        var scaleX, scaleY;
+
         if (typeof easing === "number") {
-            return this.tween({
-                scaleX: arguments[0],
-                scaleY: arguments[1],
-                time: arguments[2],
-                easing: arguments[3]
-            });
+            scaleX = arguments[0];
+            scaleY = arguments[1];
+            time = arguments[2];
+            easing = arguments[3];
+        } else {
+            scaleX = scaleY = scale;
         }
+
         return this.tween({
-            scaleX: scale,
-            scaleY: scale,
+            scaleX: scaleX,
+            scaleY: scaleY,
             time: time,
             easing: easing
         });
@@ -6800,24 +6734,23 @@ enchant.Timeline = enchant.Class.create(enchant.EventTarget, {
      * @return {enchant.Timeline}
      */
     scaleBy: function(scale, time, easing) {
+        var scaleX, scaleY;
+
         if (typeof easing === "number") {
-            return this.tween({
-                scaleX: function() {
-                    return this.scaleX * arguments[0];
-                },
-                scaleY: function() {
-                    return this.scaleY * arguments[1];
-                },
-                time: arguments[2],
-                easing: arguments[3]
-            });
+            scaleX = arguments[0];
+            scaleY = arguments[1];
+            time = arguments[2];
+            easing = arguments[3];
+        } else {
+            scaleX = scaleY = scale;
         }
+
         return this.tween({
             scaleX: function() {
-                return this.scaleX * scale;
+                return this.scaleX * scaleX;
             },
             scaleY: function() {
-                return this.scaleY * scale;
+                return this.scaleY * scaleY;
             },
             time: time,
             easing: easing
@@ -6860,18 +6793,21 @@ enchant.Action = enchant.Class.create(enchant.ActionEventTarget, {
     /**
      * @name enchant.Action
      * @class
-     * Action class.
-     * Actions are units that make up the time line,
+     * Actions are units that make up the timeline.
      * It is a unit used to specify the action you want to perform.
-     * Action has been added to the time line is performed in order.
+     * 
+     * Actions that have been added to the timeline are performed in sequential order.
+     * The transition from one action to the next occurs automatically 
+     * after the number of frames specified by the time parameter have elapsed.
      *
-     * Actionstart, actiontick event is fired when the action is started and stopped,
-     * When one frame has elapsed actiontick event is also issued.
-     * Specify the action you want to perform as a listener for these events.
-     * The transition to the next action automatically the number of frames that are specified in the time has elapsed.
+     * An actionstart event is fired when the action has started.
+     * An actionend event is fired when the action has stopped.
+     * For each frame that elapses, an actiontick event is fired.
+     * 
+     * You can specify a listener for these events to perform specific events when they occur.
      *
      * @param {Object} param
-     * @param {Number} [param.time] The number of frames that will last action. infinite length is specified null.
+     * @param {Number} [param.time] The number of frames that the action will persist. For an infinite number set this to null.
      * @param {Function} [param.onactionstart] Event listener for when the action is initiated.
      * @param {Function} [param.onactiontick] Event listener for when the action has passed one frame.
      * @param {Function} [param.onactionend] Event listener for when the action is finished.
@@ -6926,13 +6862,13 @@ enchant.ParallelAction = enchant.Class.create(enchant.Action, {
     /**
      * @name enchant.ParallelAction
      * @class
+     * Actions to be executed in parallel.
+     * It's possible to have more than one child action.
      * @constructs
      * @extends enchant.Action
      */
     initialize: function(param) {
         enchant.Action.call(this, param);
-        var timeline = this.timeline;
-        var node = this.node;
         /**
          * Children Actions.
          * @type enchant.Action[]
@@ -6988,8 +6924,8 @@ enchant.ParallelAction = enchant.Class.create(enchant.Action, {
         });
 
         this.addEventListener(enchant.Event.REMOVED_FROM_TIMELINE, function() {
-            this.actions = this.endedActions;
-            this.endedActions = [];
+            that.actions = that.endedActions;
+            that.endedActions = [];
         });
 
     }
@@ -7014,10 +6950,7 @@ enchant.Tween = enchant.Class.create(enchant.Action, {
         enchant.Action.call(this, params);
 
         if (this.easing == null) {
-            // linear
-            this.easing = function(t, b, c, d) {
-                return c * t / d + b;
-            };
+            this.easing = enchant.Easing.LINEAR;
         }
 
         var tween = this;
