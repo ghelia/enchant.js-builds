@@ -13,8 +13,7 @@ Download
 
 - [enchant.js](https://raw.github.com/uei/enchant.js-builds/master/build/enchant.js)
 - [enchant.min.js](https://raw.github.com/uei/enchant.js-builds/master/enchant.min.js) (compressed)
-
-- [Download Zip](https://github.com/wise9/enchant.js/archive/master.zip)
+- [Download Zip](https://github.com/uei/enchant.js-builds/archive/master.zip)
 
 Documentation
 -------------
