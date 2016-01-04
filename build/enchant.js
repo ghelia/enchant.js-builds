@@ -2,7 +2,7 @@
  * enchant.js v0.8.3
  * http://enchantjs.com
  *
- * Copyright Ubiquitous Entertainment Inc.
+ * Copyright UEI Corporation
  * Released under the MIT license.
  */
 
@@ -5872,7 +5872,7 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
-     * Current playback position (seconds).
+     * Volume. 0 (muted) ～ 1 (full volume).
      * @type Number
      */
     volume: {
@@ -5888,7 +5888,7 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         }
     },
     /**
-     * Volume. 0 (muted) ～ 1 (full volume).
+     * Current playback position (seconds).
      * @type Number
      */
     currentTime: {

@@ -13,7 +13,7 @@
  * @require enchant.js v0.6+
  *
  * @version 0.1
- * @author Ubiquitous Entertainment Inc. (Kevin Kratzer)
+ * @author UEI Corporation (Kevin Kratzer)
  **/
 
 if (enchant !== undefined) {
