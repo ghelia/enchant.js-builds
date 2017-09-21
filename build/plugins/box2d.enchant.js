@@ -98,8 +98,8 @@ enchant.box2d = {};
             );
         },
         /**
-         * 物理シミュレーション内の時間を進める
-         * @param {b2Vec2} [pos] Spriteの座標.
+         * 物理シミュレーション内の時間をFPSの1フレーム分進める
+         * @param {Number} [fps] ゲームのFPS
          */
         step: function(fps) {
             world.Step(1 / fps, this.iterations, this.iterations);
